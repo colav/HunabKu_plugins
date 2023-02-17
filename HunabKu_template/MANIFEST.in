@@ -1,0 +1,2 @@
+recursive-include hunabku_template/ *.py
+recursive-include hunabku_template/ *.*
