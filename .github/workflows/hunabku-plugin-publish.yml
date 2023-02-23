@@ -1,0 +1,52 @@
+# This workflows will upload a Python Package using Twine when a release is created
+
+
+name: Hunabku CI/CD pipeline
+
+on:
+  push:
+    tags:
+       - '*/v*'
+  
+jobs:
+  build-publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set environnment package name  and version
+      run: |
+        PACKAGE_TAG=${GITHUB_REF#refs/*/}
+        PACKAGE_NAME=$(echo $PACKAGE_TAG | cut -d / -f 1)
+
+        echo "PACKAGE_TAG=$PACKAGE_TAG" >> $GITHUB_ENV
+        echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_ENV
+        echo "PACKAGE_VERSION=$(echo $PACKAGE_TAG | cut -d / -f 2)" >> $GITHUB_ENV
+
+
+    - name: Install Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies 
+      run: |
+        cd $PACKAGE_NAME
+        pip install build twine
+
+    - name: Build wheel
+      run: |
+        cd $PACKAGE_NAME
+        python -m build
+
+    - name: Publish distribution to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: |
+        cd $PACKAGE_NAME
+        twine upload --repository pypi dist/*
