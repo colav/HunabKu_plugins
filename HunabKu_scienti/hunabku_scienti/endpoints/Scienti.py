@@ -1,12 +1,13 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
-from hunabku.Config import Param
+from hunabku.Config import Config, Param
 from pymongo import MongoClient
 import pandas as pd
 import os
 import sys
 
 class Scienti(HunabkuPluginBase):
-    config = Param(db_uri="mongodb://localhost:27017/", doc="MongoDB string connection")
+    config = Config()
+    config += Param(db_uri="mongodb://localhost:27017/", doc="MongoDB string connection")
     
     def __init__(self, hunabku):
         super().__init__(hunabku)
