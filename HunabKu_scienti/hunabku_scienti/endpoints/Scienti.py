@@ -1,14 +1,13 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
-import pandas as pd
-import os
 import sys
+
 
 class Scienti(HunabkuPluginBase):
     config = Config()
     config += Param(db_uri="mongodb://localhost:27017/", doc="MongoDB string connection")
-    
+
     def __init__(self, hunabku):
         super().__init__(hunabku)
         self.dbclient = MongoClient(self.config.db_uri)
@@ -65,9 +64,9 @@ class Scienti(HunabkuPluginBase):
         @api {get} /scienti/product Scienti prouduct endpoint
         @apiName product
         @apiGroup Scienti
-        @apiDescription Allows to perform queries for products, 
-                        model_year is mandatory parameter, if model year is the only 
-                        parameter passed, the endpoint returns all the dump of the database. 
+        @apiDescription Allows to perform queries for products,
+                        model_year is mandatory parameter, if model year is the only
+                        parameter passed, the endpoint returns all the dump of the database.
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} COD_RH  User primary key
@@ -145,8 +144,8 @@ class Scienti(HunabkuPluginBase):
                     mimetype='application/json'
                 )
                 return response
-            except:
-                data = {"error": "Bad Request", "message": str(sys.exc_info())}
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(sys.exc_info()), "execption": str(e)}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=400,
@@ -162,9 +161,9 @@ class Scienti(HunabkuPluginBase):
         @api {get} /scienti/network Scienti network endpoint
         @apiName network
         @apiGroup Scienti
-        @apiDescription Allows to perform queries for networks, 
-                        model_year is mandatory parameter, if model year is the only 
-                        parameter passed, the endpoint returns all the dump of the database. 
+        @apiDescription Allows to perform queries for networks,
+                        model_year is mandatory parameter, if model year is the only
+                        parameter passed, the endpoint returns all the dump of the database.
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} COD_RH  User primary key
@@ -244,8 +243,8 @@ class Scienti(HunabkuPluginBase):
                 )
                 return response
 
-            except:
-                data = {"error": "Bad Request", "message": str(sys.exc_info())}
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(sys.exc_info()), "execption": str(e)}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=400,
@@ -261,9 +260,9 @@ class Scienti(HunabkuPluginBase):
         @api {get} /scienti/project Scienti project endpoint
         @apiName project
         @apiGroup Scienti
-        @apiDescription Allows to perform queries for projects, 
-                        model_year is mandatory parameter, if model year is the only 
-                        parameter passed, the endpoint returns all the dump of the database. 
+        @apiDescription Allows to perform queries for projects,
+                        model_year is mandatory parameter, if model year is the only
+                        parameter passed, the endpoint returns all the dump of the database.
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} COD_RH  User primary key
@@ -342,8 +341,8 @@ class Scienti(HunabkuPluginBase):
                 )
                 return response
 
-            except:
-                data = {"error": "Bad Request", "message": str(sys.exc_info())}
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(sys.exc_info()), "exception": str(e)}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=400,
@@ -359,9 +358,9 @@ class Scienti(HunabkuPluginBase):
         @api {get} /scienti/event Scienti event endpoint
         @apiName event
         @apiGroup Scienti
-        @apiDescription Allows to perform queries for events, 
-                        model_year is mandatory parameter, if model year is the only 
-                        parameter passed, the endpoint returns all the dump of the database. 
+        @apiDescription Allows to perform queries for events,
+                        model_year is mandatory parameter, if model year is the only
+                        parameter passed, the endpoint returns all the dump of the database.
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} COD_RH  User primary key
@@ -439,8 +438,8 @@ class Scienti(HunabkuPluginBase):
                 )
                 return response
 
-            except:
-                data = {"error": "Bad Request", "message": str(sys.exc_info())}
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(sys.exc_info()), "exception": str(e)}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=400,
@@ -456,9 +455,9 @@ class Scienti(HunabkuPluginBase):
         @api {get} /scienti/patent Scienti patent endpoint
         @apiName event
         @apiGroup Scienti
-        @apiDescription Allows to perform queries for patents, 
-                        model_year is mandatory parameter, if model year is the only 
-                        parameter passed, the endpoint returns all the dump of the database. 
+        @apiDescription Allows to perform queries for patents,
+                        model_year is mandatory parameter, if model year is the only
+                        parameter passed, the endpoint returns all the dump of the database.
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} COD_RH  User primary key
@@ -536,8 +535,8 @@ class Scienti(HunabkuPluginBase):
                 )
                 return response
 
-            except:
-                data = {"error": "Bad Request", "message": str(sys.exc_info())}
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(sys.exc_info()), "exception": str(e)}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=400,
