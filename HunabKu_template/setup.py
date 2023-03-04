@@ -80,8 +80,6 @@ def main():
         # Dependent packages (distributions)
         # put you packages here
         install_requires=[
-            'flask>=1.1.2',
-            'requests>=2.22.0',
             'hunabku'
         ],
     )
