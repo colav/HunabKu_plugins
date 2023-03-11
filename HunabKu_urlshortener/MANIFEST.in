@@ -1,0 +1,2 @@
+recursive-include hunabku_urlshortener/ *.py
+recursive-include hunabku_urlshortener/ *.*

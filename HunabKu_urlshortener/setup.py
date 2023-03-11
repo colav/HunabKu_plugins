@@ -51,10 +51,10 @@ if os.name in ('nt', 'dos'):
 def main():
     setup(
         # Application name:
-        name="Hunabku_template",
+        name="Hunabku_urlshortener",
 
         # Version number (initial):
-        version=get_version('hunabku_template/_version.py'),
+        version=get_version('hunabku_urlshortener/_version.py'),
 
         # Application author details:
         author="Colav",
@@ -80,7 +80,9 @@ def main():
         # Dependent packages (distributions)
         # put you packages here
         install_requires=[
-            'hunabku'
+            'hunabku',
+            'validators',
+            'pymongo'
         ],
     )
 
