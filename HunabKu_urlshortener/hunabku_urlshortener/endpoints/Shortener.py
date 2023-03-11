@@ -41,7 +41,6 @@ class Shortener(HunabkuPluginBase):
         @apiSuccess  redirect to the website 
         """
         x = self.collection.find_one({"_id": ObjectId(url_id)})
-        print(x)
         if x:
             return redirect(x["url"])
         else:
