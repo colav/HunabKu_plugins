@@ -36,8 +36,10 @@ jobs:
         flake8 . --count --ignore=C901 --exit-zero --max-complexity=10 --max-line-length=200 --statistics
     - name: Test all plugins with hunbaku
       run: |
+        sudo apt-get install -y nodejs npm
+        npm install -g apidoc
         pip install hunabku --user
-        for i in $(ls -d HunabKu*);do pip install -y $i; done
+        for i in $(ls -d HunabKu*);do pip install  $i; done
         hunabku_server --generate_config config.py
         pytest -s
         #teardown
