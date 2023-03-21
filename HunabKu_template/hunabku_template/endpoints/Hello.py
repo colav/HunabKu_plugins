@@ -19,7 +19,6 @@ class Hello(HunabkuPluginBase):
         @apiGroup Template
 
 
-        @apiSuccess {String} {'hello': 'world'}.
         """
         if self.valid_apikey():
             response = self.app.response_class(
@@ -30,21 +29,3 @@ class Hello(HunabkuPluginBase):
             return response
         else:
             return self.apikey_error()
-
-    @endpoint('/config', methods=['GET'])
-    def config_end(self):
-        """
-        @api {get} /config/ Config
-        @apiDescription returns the plugin config, this endpoint doesn´t require apikey
-        @apiName Config
-        @apiGroup Template
-
-        @apiSuccess {String} firstname Firstname of the User.
-        @apiSuccess {String} lastname  Lastname of the User.
-        """
-        response = self.app.response_class(
-            response=self.json.dumps(self.config.dict()),
-            status=200,
-            mimetype='application/json'
-        )
-        return response
