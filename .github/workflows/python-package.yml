@@ -39,7 +39,7 @@ jobs:
         sudo apt-get install -y nodejs npm
         npm install -g apidoc
         pip install hunabku --user
-        for i in $(ls -d HunabKu*);do pip install  $i; done
+        for i in $(ls -d HunabKu*);do pip install  ./$i; done
         hunabku_server --generate_config config.py
         pytest -s
         #teardown
