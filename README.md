@@ -1,4 +1,4 @@
-[![Python package](https://github.com/colav/HunabKu_plugins/actions/workflows/python-package.yml/badge.svg)](https://github.com/colav/HunabKu_plugins/actions/workflows/python-package.yml)
+[![Python package](https://github.com/colav/HunabKu_plugins/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/colav/HunabKu_plugins/actions/workflows/python-package.yml)
 
 # HunabKu_plugins
 Mono Repo for HunabKu Plugins 
