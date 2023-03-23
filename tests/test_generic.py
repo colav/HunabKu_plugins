@@ -17,7 +17,12 @@ class TestHunabku(unittest.TestCase):
     """
 
     def setUp(self):
-        print('running setUp')
+        print('############################ running setUp ############################')
+        res = run(['hunabku_server', '--generate_config', 'config.py','--overwrite'])
+        print(res.output.decode())
+        if res.exit != 0:
+            print("ERROR: in generate_config ")
+            sys.exit(res.exit)
 
     def test__load_plugins(self):
         print('############################ running load plugins tests ############################')
