@@ -26,10 +26,25 @@ or
 Should I know something is not is apidocs?
 if yes, then put it here.
 
-Additional parameters for hunabku in the command line should be here as well.
-example to load the plgun in the server:
+Additional parameters for hunabku in the config should be here as well.
+example :
 
-`hunabku_server --plugins template,scienti,etc...`
+```
+# myvar
+# this is an example var
+config.hunabku_template.Hello.Hello.myvar = "myvalue"
+
+# port
+# this is other way to set doc
+config.hunabku_template.Hello.Hello.subcategory.port = 8099
+
+# host
+# 
+config.hunabku_template.Hello.Hello.subcategory.host = "host"
+
+```
+Those parameters are not really needed in the condfig file, it is just for illustration.
+
 
 # License
 BSD-3-Clause License 
