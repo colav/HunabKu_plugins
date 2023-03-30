@@ -118,7 +118,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['COD_RH', 'COD_PRODUCTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey','COD_RH', 'COD_PRODUCTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -221,7 +221,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['COD_RH', 'COD_RED', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_RED', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -326,7 +326,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['COD_RH', 'COD_PROYECTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PROYECTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -429,7 +429,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['COD_RH', 'COD_PROYECTO', 'COD_EVENTO', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PROYECTO', 'COD_EVENTO', 'model_year', 'institution'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -532,7 +532,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['COD_RH', 'COD_PROYECTO', 'COD_PATENTE', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PROYECTO', 'COD_PATENTE', 'model_year', 'institution'], self.request.args.keys())
             if response is not None:
                 return response
 
