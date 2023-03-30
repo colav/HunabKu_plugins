@@ -2,6 +2,7 @@ from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
 import sys
+import re
 
 
 class Scienti(HunabkuPluginBase):
@@ -56,7 +57,7 @@ class Scienti(HunabkuPluginBase):
                                                    status=400,
                                                    mimetype='application/json'
                                                    )
-            return response
+                return response
         return None
 
     def check_db(self, db_name):
@@ -491,7 +492,7 @@ class Scienti(HunabkuPluginBase):
             return self.apikey_error()
 
     @endpoint('/scienti/patent', methods=['GET'])
-    def patent_event(self):
+    def scienti_patent(self):
         """
         @api {get} /scienti/patent Scienti patent endpoint
         @apiName event
@@ -565,6 +566,127 @@ class Scienti(HunabkuPluginBase):
                 if sgl_cat:
                     data = list(self.db["patent"].find(
                         {'SGL_CATEGORIA': sgl_cat}, {"_id": 0}))
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
+
+                data = {
+                    "error": "Bad Request", "message": "invalid parameters, please select the right combination of parameters"}
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=400,
+                    mimetype='application/json'
+                )
+                return response
+
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(
+                    sys.exc_info()), "exception": str(e)}
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=400,
+                    mimetype='application/json'
+                )
+                return response
+        else:
+            return self.apikey_error()
+
+    @endpoint('/scienti/info/', methods=['GET'])
+    def scienti_info(self):
+        """
+        @api {get} /scienti/info Scienti info endpoint
+        @apiName Info
+        @apiGroup Scienti
+        @apiDescription Allows to perform queries for information,
+                        about avialable institution and ids.
+        @apiParam {String} apikey  Credential for authentication
+        @apiParam {String} get Options are resume and ids, ids require additional parameters model_year and institution
+        @apiParam {String} model_year  Year of the scienti model, example: 2022
+        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula
+
+        @apiSuccess {Object}  Resgisters from MongoDB in Json format.
+
+        @apiError (Error 401) msg  The HTTP 401 Unauthorized invalid authentication apikey for the target resource.
+        @apiError (Error 400) msg  Bad request, if the query is not right.
+
+        @apiExample {curl} Example usage:
+            # resume of scienti data bases and model_years
+            curl -i http://apis.colav.co/scienti/info?apikey=XXXX&get=resume
+            curl -i http://apis.colav.co/scienti/info?apikey=XXXX&get=ids&institution=udea&model_year=2022
+        """
+        if self.valid_apikey():
+            option = self.request.args.get('get')
+            if not option:
+                response = self.check_parameters(
+                    ['apikey', 'get'], self.request.args.keys())
+                if response is not None:
+                    return response
+            try:
+                if option == "resume":
+                    data = []
+                    dbs = self.dbclient.list_database_names()
+                    for db in dbs:
+                        if re.match(r'^scienti_*_*', db):
+                            values = re.split("_", db)
+                            cols = []
+                            for col in self.dbclient[db].list_collection_names():
+                                if "_checkpoint" not in col:
+                                    count = self.dbclient[db][col].count_documents(
+                                        {})
+                                    cols.append({'name': col, 'count': count})
+                            data.append(
+                                {"institution": values[1], 'model_year': values[2], 'entities': cols})
+
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
+
+                if option == "ids":
+                    response = self.check_parameters(
+                        ['apikey', 'get', 'institution', 'model_year'], self.request.args.keys())
+                    if response is not None:
+                        return response
+                    model_year = self.request.args.get('model_year')
+                    institution = self.request.args.get('institution')
+                    db = f'scienti_{institution}_{model_year}'
+
+                    response = self.check_db(db)
+                    if response is not None:
+                        return response
+
+                    data = []
+                    cols = []
+                    for col in self.dbclient[db].list_collection_names():
+                        if "_checkpoint" not in col:
+                            ids = []
+                            if col == "product":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_RH': 1, 'COD_PRODUCTO': 1, '_id': 0}))
+                            if col == "patent":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_RH': 1, 'COD_PATENTE': 1, '_id': 0}))
+                            if col == "event":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_RH': 1, 'COD_EVENTO': 1, '_id': 0}))
+                            if col == "network":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_RH': 1, 'COD_RED': 1, '_id': 0}))
+                            if col == "project":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_RH': 1, 'COD_PROYECTO': 1, '_id': 0}))
+                            if col == "institution_endorsement":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_AVAL_INSTITUCION': 1, '_id': 0}))
+                            cols.append({'name': col, 'ids': ids})
+                    data.append({"institution": institution,
+                                'model_year': model_year, 'entities': cols})
+
                     response = self.app.response_class(
                         response=self.json.dumps(data),
                         status=200,
