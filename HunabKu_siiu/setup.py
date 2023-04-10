@@ -82,7 +82,10 @@ def main():
         install_requires=[
             'flask>=1.1.2',
             'requests>=2.22.0',
-            'hunabku'
+            'hunabku',
+            'pymongo',
+            'elasticsearch',
+            'elasticsearch_dsl',
         ],
     )
 
