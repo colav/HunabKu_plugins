@@ -3,7 +3,7 @@ from hunabku.Config import Config, Param
 from pymongo import MongoClient
 from elasticsearch import Elasticsearch, helpers
 from elasticsearch_dsl import Search
-
+import time
 
 class SIIU(HunabkuPluginBase):
     config = Config()
@@ -78,16 +78,23 @@ class SIIU(HunabkuPluginBase):
                     }
                 }
                 }
+                # get the start time
+                st = time.time()
                 s = Search(using=self.es, index=self.config.es_project_index)
                 s = s.update_from_dict(body)
                 s = s.extra(track_total_hits=True)
                 s.execute()
-                data = [hit for hit in s.scan()]
+                data = [hit.to_dict() for hit in s.scan()]
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=200,
                     mimetype='application/json'
                 )
+                # get the end time
+                et = time.time()
+                # get the execution time
+                elapsed_time = et - st
+                print(f'Search for "{keyword}" Execution time:', elapsed_time, 'seconds')
                 return response
             if codigo:
                 data = list(self.dbclient[self.config.mdb_name]
