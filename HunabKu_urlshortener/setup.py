@@ -23,6 +23,7 @@ import sys
 import codecs
 
 
+
 v = sys.version_info
 
 
@@ -82,7 +83,8 @@ def main():
         install_requires=[
             'hunabku',
             'validators',
-            'pymongo'
+            'pymongo',
+            'pybase62'
         ],
     )
 
