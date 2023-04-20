@@ -1,0 +1,2 @@
+recursive-include hunabku_openscienti/ *.py
+recursive-include hunabku_openscienti/ *.*
