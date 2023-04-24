@@ -1,14 +1,15 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from flask import redirect
-from pymongo import MongoClient, ReturnDocument, errors
+from pymongo import MongoClient, errors
 import validators
 import datetime
 import base62
 
 class Shortener(HunabkuPluginBase):
-    last_sec = None
+    
     counter = 0
+    last_sec = None
 
     config = Config()
     config += Param(db_uri="mongodb://localhost:27017/",
@@ -38,10 +39,59 @@ class Shortener(HunabkuPluginBase):
             return False
 
 
+    def generate_code(self):
+        """
+        Generate a short code for a URL based on the current timestamp.
+
+        Returns:
+            A string with the short code for the URL.
+        """
+
+        curr_secs = int(datetime.datetime.now().timestamp())
+
+        self.counter += 1
+
+        if curr_secs != self.last_sec:
+            self.last_sec = curr_secs
+            self.counter = 0
+            
+        #generate short code using base62 encoding
+        short_code = base62.encode(int(f"{curr_secs}{self.counter}"))
+
+        return short_code    
+    
+   
+    def insert_url(self, url):
+        """
+        Insert a URL and its corresponding short code in the MongoDB collection.
+
+        Args:
+            url: A string with the URL to be shortened.
+        """
+        tries = 0
+        
+        while tries < self.config.maxtries:
+            short_code = self.generate_code()
+            try:
+                self.collection.insert_one({'_id': short_code, 'url': url})
+                return short_code
+            
+            except errors.DuplicateKeyError:
+                tries += 1
+
+        response = self.app.response_class(
+            response = self.json.dumps(
+                {"error": "Could not generate a unique short code"}),
+            status=500,
+            mimetype='application/json'
+        )
+        return response
+
+
     @endpoint('/<url_code>', methods=['GET', 'POST'])
     def url_id_end(self, url_code):
         """
-        @api {get} /s/<url_code> Url code resolver
+        @api {get} /<url_code> Url code resolver
         @apiDescription redirects to an url given the url id
         @apiName resolver
         @apiGroup UrlShortener
@@ -58,6 +108,7 @@ class Shortener(HunabkuPluginBase):
                 mimetype='application/json'
             )
             return response
+
 
     @endpoint('/shorturl_create', methods=['GET', 'POST'])
     def url_create_end(self):
@@ -91,65 +142,15 @@ class Shortener(HunabkuPluginBase):
                 mimetype='application/json'
             )
             return response
-        
     
-    def generate_code(self):
-        """
-        Generate a short code for a URL based on the current timestamp.
 
-        Returns:
-            A string with the short code for the URL.
-        """
-        global last_sec
-
-        curr_secs = int(datetime.datetime.now().timestamp())
-
-        counter += 1
-
-        if curr_secs != last_sec:
-            last_sec = curr_secs
-            counter = 0
-            
-        #generate short code using base62 encoding
-        short_code = base62.encode(int(f"{curr_secs}{counter}"))
-
-        return short_code    
-    
-   
-    def insert_url(self, url):
-        """
-        Insert a URL and its corresponding short code in the MongoDB collection.
-
-        Args:
-            url: A string with the URL to be shortened.
-        """
-        tries = 0
+        url = args["url"]
+        short_code = self.insert_url(url)
         
-        while tries < self.config.maxtries:
-            short_code = self.generate_code()
-            try:
-                self.collection.insert_one({'_id': short_code, 'url': url})
-                return short_code
-            
-            except errors.DuplicateKeyError:
-                tries += 1
-
+        data = {"url_code": str(short_code)}
         response = self.app.response_class(
-            response = self.json.dumps(
-                {"error": "Could not generate a unique short code"}),
-            status=500,
+            response=self.json.dumps(data),
+            status=200,
             mimetype='application/json'
         )
         return response
-
-
-    url = args["url"]
-    short_code = insert_url(url)
-    
-    data = {"url_code": str(short_code)}
-    response = self.app.response_class(
-        response=self.json.dumps(data),
-        status=200,
-        mimetype='application/json'
-    )
-    return response
