@@ -6,16 +6,12 @@ import validators
 import datetime
 import base62
 
-<<<<<<< HEAD
-class Shortener(HunabkuPluginBase):
-    
-    counter = 0
-    last_sec = None
-=======
-last_sec = None
->>>>>>> parent of 87f07b7 (The requested changes have been made.)
 
 class Shortener(HunabkuPluginBase):
+
+    counter = 0
+    last_sec = None
+
     config = Config()
     config += Param(db_uri="mongodb://localhost:27017/",
                     doc="MongoDB string connection")
@@ -25,6 +21,9 @@ class Shortener(HunabkuPluginBase):
 
     config += Param(collection_name="records",
                     doc="Mongo DB collection name to save the records")
+    
+    config += Param(maxtries=3,
+                    doc="Number of times to try generating a new short code if the insertion fails")
 
     def __init__(self, hunabku):
         super().__init__(hunabku)
@@ -39,7 +38,6 @@ class Shortener(HunabkuPluginBase):
         else:
             return False
 
-<<<<<<< HEAD
 
     def generate_code(self):
         """
@@ -91,9 +89,6 @@ class Shortener(HunabkuPluginBase):
 
 
     @endpoint('/<url_code>', methods=['GET', 'POST'])
-=======
-    @endpoint('/s/<url_code>', methods=['GET', 'POST'])
->>>>>>> parent of 87f07b7 (The requested changes have been made.)
     def url_id_end(self, url_code):
         """
         @api {get} /<url_code> Url code resolver
@@ -147,70 +142,10 @@ class Shortener(HunabkuPluginBase):
                 mimetype='application/json'
             )
             return response
-<<<<<<< HEAD
     
 
         url = args["url"]
-        short_code = self.insert_url(url)
-        
-=======
-        
-        
-        def generate_code():
-            """
-            Generate a short code for a URL based on the current timestamp and a counter stored in MongoDB.
-
-            Returns:
-                A string with the short code for the URL.
-            """
-            global last_sec
-
-            curr_secs = int(datetime.datetime.now().timestamp())
-
-            counter_doc = self.collection.find_one_and_update(
-                    {'_id': 'counter'},
-                    {'$setOnInsert': {'last_timestamp': curr_secs}, '$inc': {'value': 1}},
-                    upsert = True,
-                    return_document = ReturnDocument.AFTER)
-
-            last_sec = counter_doc['last_timestamp']
-            counter = counter_doc['value']
-
-            if curr_secs != last_sec:
-                self.collection.update_one({'_id': 'counter'}, {'$set': {'last_timestamp': curr_secs, 'value': 0}})
-                last_sec = curr_secs
-                counter = 0
-                
-            #generate short code using base62 encoding
-            short_code = base62.encode(int(f"{curr_secs}{counter}"))
-
-            return short_code
-
-        def insert_url(url):
-            """
-            Insert a URL and its corresponding short code in the MongoDB collection.
-
-            Args:
-                url: A string with the URL to be shortened.
-            """
-            short_code = generate_code()
-            try:
-                self.collection.insert_one({'_id': short_code, 'url': url})
-            
-            except errors.DuplicateKeyError:
-                response = self.app.response_class(
-                    response = self.json.dumps(
-                    {"error": "Internal Server Error"}),
-                status=500,
-                mimetype='application/json')
-                return response
-
-            return short_code
-
-        url = args["url"]
-        short_code = insert_url(url)
-        
->>>>>>> parent of 87f07b7 (The requested changes have been made.)
+        short_code = self.insert_url(url)        
         data = {"url_code": str(short_code)}
         response = self.app.response_class(
             response=self.json.dumps(data),
