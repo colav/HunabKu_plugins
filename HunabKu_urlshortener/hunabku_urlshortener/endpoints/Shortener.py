@@ -1,12 +1,17 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from flask import redirect
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 import validators
-from bson.objectid import ObjectId
+import datetime
+import base62
 
 
 class Shortener(HunabkuPluginBase):
+
+    counter = 0
+    last_sec = None
+
     config = Config()
     config += Param(db_uri="mongodb://localhost:27017/",
                     doc="MongoDB string connection")
@@ -16,6 +21,9 @@ class Shortener(HunabkuPluginBase):
 
     config += Param(collection_name="records",
                     doc="Mongo DB collection name to save the records")
+    
+    config += Param(maxtries=3,
+                    doc="Number of times to try generating a new short code if the insertion fails")
 
     def __init__(self, hunabku):
         super().__init__(hunabku)
@@ -30,37 +38,88 @@ class Shortener(HunabkuPluginBase):
         else:
             return False
 
-    @endpoint('/shorturl/<url_id>', methods=['GET', 'POST'])
-    def url_id_end(self, url_id):
+
+    def generate_code(self):
         """
-        @api {get} /shorturl/<url_id> Url resolver
-        @apiDescription redirects to an url given the url id
+        Generate a short code for a URL based on the current timestamp.
+
+        Returns:
+            A string with the short code for the URL.
+        """
+
+        curr_secs = int(datetime.datetime.now().timestamp())
+
+        self.counter += 1
+
+        if curr_secs != self.last_sec:
+            self.last_sec = curr_secs
+            self.counter = 0
+            
+        #generate short code using base62 encoding
+        short_code = base62.encode(int(f"{curr_secs}{self.counter}"))
+
+        return short_code    
+    
+   
+    def insert_url(self, url):
+        """
+        Insert a URL and its corresponding short code in the MongoDB collection.
+
+        Args:
+            url: A string with the URL to be shortened.
+        """
+        tries = 0
+        
+        while tries < self.config.maxtries:
+            short_code = self.generate_code()
+            try:
+                self.collection.insert_one({'_id': short_code, 'url': url})
+                return short_code
+            
+            except errors.DuplicateKeyError:
+                tries += 1
+
+        response = self.app.response_class(
+            response = self.json.dumps(
+                {"error": "Could not generate a unique short code"}),
+            status=500,
+            mimetype='application/json'
+        )
+        return response
+
+
+    @endpoint('/<url_code>', methods=['GET', 'POST'])
+    def url_id_end(self, url_code):
+        """
+        @api {get} /<url_code> URL code resolver
+        @apiDescription Redirects to an URL given a shortened code
         @apiName resolver
-        @apiGroup UrlShortener
+        @apiGroup URLShortener
 
         @apiSuccess  redirect to the website 
         """
-        x = self.collection.find_one({"_id": ObjectId(url_id)})
+        x = self.collection.find_one({"_id": url_code})
         if x:
             return redirect(x["url"])
         else:
             response = self.app.response_class(
-                response=self.json.dumps({"error": "urlid not found"}),
+                response=self.json.dumps({"error": "url_code not found"}),
                 status=404,
                 mimetype='application/json'
             )
             return response
 
-    @endpoint('/shorturl_create', methods=['GET', 'POST'])
+
+    @endpoint('/create', methods=['GET', 'POST'])
     def url_create_end(self):
         """
-        @api {get} /shorturl_create Url create
-        @apiDescription creates an url id
+        @api {get} /create  Create a shortened URL
+        @apiDescription Creates a unique shortened code
         @apiName create
-        @apiGroup UrlShortener
+        @apiGroup URLShortener
 
         @apiParam {String} apikey  Credential for authentication
-        @apiParam {String} url  url to encode
+        @apiParam {String} url  URL to encode
 
         @apiSuccess  redirect to the website 
         """
@@ -83,9 +142,11 @@ class Shortener(HunabkuPluginBase):
                 mimetype='application/json'
             )
             return response
+    
+
         url = args["url"]
-        x = self.collection.insert_one({"url": url})
-        data = {"urlid": str(x.inserted_id)}
+        short_code = self.insert_url(url)        
+        data = {"url_code": str(short_code)}
         response = self.app.response_class(
             response=self.json.dumps(data),
             status=200,
