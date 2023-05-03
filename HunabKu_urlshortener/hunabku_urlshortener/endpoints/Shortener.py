@@ -91,10 +91,10 @@ class Shortener(HunabkuPluginBase):
     @endpoint('/<url_code>', methods=['GET', 'POST'])
     def url_id_end(self, url_code):
         """
-        @api {get} /<url_code> Url code resolver
-        @apiDescription redirects to an url given the url id
+        @api {get} /<url_code> URL code resolver
+        @apiDescription Redirects to an URL given a shortened code
         @apiName resolver
-        @apiGroup UrlShortener
+        @apiGroup URLShortener
 
         @apiSuccess  redirect to the website 
         """
@@ -110,16 +110,16 @@ class Shortener(HunabkuPluginBase):
             return response
 
 
-    @endpoint('/shorturl_create', methods=['GET', 'POST'])
+    @endpoint('/create', methods=['GET', 'POST'])
     def url_create_end(self):
         """
-        @api {get} /shorturl_create Url create
-        @apiDescription creates an url id
+        @api {get} /create  Create a shortened URL
+        @apiDescription Creates a unique shortened code
         @apiName create
-        @apiGroup UrlShortener
+        @apiGroup URLShortener
 
         @apiParam {String} apikey  Credential for authentication
-        @apiParam {String} url  url to encode
+        @apiParam {String} url  URL to encode
 
         @apiSuccess  redirect to the website 
         """
