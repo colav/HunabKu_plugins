@@ -5,6 +5,7 @@ from elasticsearch import Elasticsearch, helpers
 from elasticsearch_dsl import Search
 import time
 
+
 class SIIU(HunabkuPluginBase):
     config = Config()
     config += Param(mdb_uri="mongodb://localhost:27017/",
@@ -41,6 +42,7 @@ class SIIU(HunabkuPluginBase):
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} search  keyword for text search.
         @apiParam {String} CODIGO  project id.
+        @apiParam {String} GRUPO_CODIGO  Colciencias Group ID ex:"COL0008423"
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -52,12 +54,16 @@ class SIIU(HunabkuPluginBase):
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&search=keyword
             # An specific product
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&CODIGO=2013-86
+            # An projects given a group id
+            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&GRUPO_CODIGO=COL0008423
 
         """
         if self.valid_apikey():
 
             keyword = self.request.args.get('search')
             codigo = self.request.args.get('CODIGO')
+            grp_codigo = self.request.args.get('GRUPO_CODIGO')
+
             if keyword:
                 if not self.es.indices.exists(index=self.config.es_project_index):
                     response = self.app.response_class(
@@ -94,11 +100,21 @@ class SIIU(HunabkuPluginBase):
                 et = time.time()
                 # get the execution time
                 elapsed_time = et - st
-                print(f'Search for "{keyword}" Execution time:', elapsed_time, 'seconds')
+                print(f'Search for "{keyword}" Execution time:',
+                      elapsed_time, 'seconds')
                 return response
             if codigo:
                 data = list(self.dbclient[self.config.mdb_name]
                             ["project"].find({'CODIGO': codigo}, {'_id': 0, }))
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=200,
+                    mimetype='application/json'
+                )
+                return response
+            if grp_codigo:
+                data = list(self.dbclient[self.config.mdb_name]
+                            ["project"].find({"project_participant.group.CODIGO_COLCIENCIAS": grp_codigo}, {"_id": 0}))
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=200,
