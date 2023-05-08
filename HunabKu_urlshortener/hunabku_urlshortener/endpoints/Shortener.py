@@ -21,7 +21,7 @@ class Shortener(HunabkuPluginBase):
 
     config += Param(collection_name="records",
                     doc="Mongo DB collection name to save the records")
-    
+
     config += Param(maxtries=3,
                     doc="Number of times to try generating a new short code if the insertion fails")
 
@@ -38,13 +38,13 @@ class Shortener(HunabkuPluginBase):
         else:
             return False
 
-
     def generate_code(self):
         """
         Generate a short code for a URL based on the current timestamp.
 
         Returns:
             A string with the short code for the URL.
+            The timestamp at which the code was generated.
         """
 
         curr_secs = int(datetime.datetime.now().timestamp())
@@ -54,13 +54,12 @@ class Shortener(HunabkuPluginBase):
         if curr_secs != self.last_sec:
             self.last_sec = curr_secs
             self.counter = 0
-            
-        #generate short code using base62 encoding
+
+        # generate short code using base62 encoding
         short_code = base62.encode(int(f"{curr_secs}{self.counter}"))
 
-        return short_code    
-    
-   
+        return short_code, curr_secs
+
     def insert_url(self, url):
         """
         Insert a URL and its corresponding short code in the MongoDB collection.
@@ -69,24 +68,26 @@ class Shortener(HunabkuPluginBase):
             url: A string with the URL to be shortened.
         """
         tries = 0
-        
+
         while tries < self.config.maxtries:
-            short_code = self.generate_code()
+            short_code, curr_secs = self.generate_code()
             try:
-                self.collection.insert_one({'_id': short_code, 'url': url})
+                self.collection.insert_one({'_id': short_code,
+                                            'url': url,
+                                            'timestamp': curr_secs,
+                                            'calls': 0})
                 return short_code
-            
+
             except errors.DuplicateKeyError:
                 tries += 1
 
         response = self.app.response_class(
-            response = self.json.dumps(
+            response=self.json.dumps(
                 {"error": "Could not generate a unique short code"}),
             status=500,
             mimetype='application/json'
         )
         return response
-
 
     @endpoint('/<url_code>', methods=['GET', 'POST'])
     def url_id_end(self, url_code):
@@ -100,6 +101,14 @@ class Shortener(HunabkuPluginBase):
         """
         x = self.collection.find_one({"_id": url_code})
         if x:
+            # add counter or number of calls in the redirect and save date of last call
+            now = int(datetime.datetime.now().timestamp())
+            self.collection.update_one(
+                {'_id': url_code},
+                {'$inc': {'calls': 1},
+                 '$set': {'last_call': now}}
+            )
+
             return redirect(x["url"])
         else:
             response = self.app.response_class(
@@ -108,7 +117,6 @@ class Shortener(HunabkuPluginBase):
                 mimetype='application/json'
             )
             return response
-
 
     @endpoint('/create', methods=['GET', 'POST'])
     def url_create_end(self):
@@ -142,10 +150,9 @@ class Shortener(HunabkuPluginBase):
                 mimetype='application/json'
             )
             return response
-    
 
         url = args["url"]
-        short_code = self.insert_url(url)        
+        short_code = self.insert_url(url)
         data = {"url_code": str(short_code)}
         response = self.app.response_class(
             response=self.json.dumps(data),
