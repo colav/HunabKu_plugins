@@ -1,7 +1,7 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch, helpers, __version__ as es_version
 from elasticsearch_dsl import Search
 import time
 
@@ -24,8 +24,11 @@ class SIIU(HunabkuPluginBase):
     def __init__(self, hunabku):
         super().__init__(hunabku)
         self.dbclient = MongoClient(self.config.mdb_uri)
-        basic_auth = (self.config.es_user, self.config.es_pass)
-        self.es = Elasticsearch(self.config.es_uri, basic_auth=basic_auth)
+        auth = (self.config.es_user, self.config.es_pass)
+        if es_version[0] < 8:
+            self.es = Elasticsearch(self.config.es_uri, http_auth=auth)
+        else:
+            self.es = Elasticsearch(self.config.es_uri, basic_auth=auth)
 
     @endpoint('/siiu/project', methods=['GET'])
     def siiu_project(self):
