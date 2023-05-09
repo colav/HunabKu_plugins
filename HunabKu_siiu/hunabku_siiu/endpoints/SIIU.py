@@ -199,7 +199,7 @@ class SIIU(HunabkuPluginBase):
             # all the products for the user
             curl -i http://apis.colav.co/siiu/info?apikey=XXXX
         """
-        data = list(self.dbclient[self.config.db_name]
+        data = list(self.dbclient[self.config.mdb_name]
                     ["project"].find({}, {'_id': 0, 'CODIGO': 1}))
         response = self.app.response_class(
             response=self.json.dumps(data),
