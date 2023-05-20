@@ -2,7 +2,6 @@ from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
 import sys
-import re
 
 
 class OpenScienti(HunabkuPluginBase):
@@ -98,7 +97,7 @@ class OpenScienti(HunabkuPluginBase):
         @apiError (Error 400) msg  Bad request, if the query is not right.
 
         @apiExample {curl} Example usage:
-            # resume of open scienti data 
+            # resume of open scienti data
             curl -i http://apis.colav.co/scienti/info
         """
         try:
