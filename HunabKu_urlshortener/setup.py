@@ -22,8 +22,6 @@ import os
 import sys
 import codecs
 
-
-
 v = sys.version_info
 
 

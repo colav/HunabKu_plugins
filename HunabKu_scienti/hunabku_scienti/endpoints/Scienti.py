@@ -118,7 +118,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['apikey','COD_RH', 'COD_PRODUCTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PRODUCTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
             if response is not None:
                 return response
 

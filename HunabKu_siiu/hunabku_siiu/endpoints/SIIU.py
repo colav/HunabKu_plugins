@@ -1,7 +1,7 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
-from elasticsearch import Elasticsearch, helpers, __version__ as es_version
+from elasticsearch import Elasticsearch, __version__ as es_version
 from elasticsearch_dsl import Search
 import time
 
@@ -82,7 +82,7 @@ class SIIU(HunabkuPluginBase):
                 body = {"query": {
                     "bool": {
                         "should": [
-                            {"match": {"NOMBRE_CORTO":  keyword}},
+                            {"match": {"NOMBRE_CORTO": keyword}},
                             {"match": {"NOMBRE_COMPLETO": keyword}},
                             {"match": {"PALABRAS_CLAVES": keyword}},
                             {"match": {"descriptive_text.TEXTO_INGRESADO": keyword}}
@@ -142,7 +142,7 @@ class SIIU(HunabkuPluginBase):
                         "bool": {
                             "must": [
                                 {"match_phrase": {
-                                    "project_participant.group.NOMBRE_COMPLETO":  group_name}},
+                                    "project_participant.group.NOMBRE_COMPLETO": group_name}},
                             ]
                         }
                     }

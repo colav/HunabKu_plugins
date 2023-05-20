@@ -97,7 +97,7 @@ class Shortener(HunabkuPluginBase):
         @apiName resolver
         @apiGroup URLShortener
 
-        @apiSuccess  redirect to the website 
+        @apiSuccess  redirect to the website
         """
         x = self.collection.find_one({"_id": url_code})
         if x:
@@ -129,7 +129,7 @@ class Shortener(HunabkuPluginBase):
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} url  URL to encode
 
-        @apiSuccess  redirect to the website 
+        @apiSuccess  redirect to the website
         """
         if not self.valid_apikey():
             return self.apikey_error()
