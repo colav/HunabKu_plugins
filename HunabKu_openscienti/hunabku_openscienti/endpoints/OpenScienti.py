@@ -17,7 +17,6 @@ class OpenScienti(HunabkuPluginBase):
         self.dbclient = MongoClient(self.config.db_uri)
         self.db = self.dbclient[self.config.db_name]
 
-
     @endpoint('/openscienti/cvlac', methods=['GET'])
     def openscienti_cvlac(self):
         """
@@ -41,14 +40,30 @@ class OpenScienti(HunabkuPluginBase):
             cod_rh = self.request.args.get('COD_RH')
             if cod_rh:
                 data = {}
-                data["raw_data"] = list(self.db["cvlac_data"].find({'id_persona_pr': cod_rh},{'_id':0}))
-                data["scrapped_data"] = list(self.db["cvlac_stage"].find({'id_persona_pr': cod_rh},{"_id":0}))
+                data["raw_data"] = list(self.db["cvlac_data"].find(
+                    {'id_persona_pr': cod_rh}, {'_id': 0}))
+                data["scrapped_data"] = list(self.db["cvlac_stage"].find(
+                    {'id_persona_pr': cod_rh}, {"_id": 0}))
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=200,
                     mimetype='application/json'
                 )
                 return response
+            else:
+                #  return all the records
+                data = {}
+                data["raw_data"] = list(
+                    self.db["cvlac_data"].find({}, {'_id': 0}))
+                data["scrapped_data"] = list(
+                    self.db["cvlac_stage"].find({}, {"_id": 0}))
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=200,
+                    mimetype='application/json'
+                )
+                return response
+
             data = {
                 "error": "Bad Request", "message": "invalid parameters, please select privide COD_RH  parameter."}
             response = self.app.response_class(
@@ -67,7 +82,6 @@ class OpenScienti(HunabkuPluginBase):
             )
             return response
 
- 
     @endpoint('/openscienti/info', methods=['GET'])
     def openscienti_info(self):
         """
@@ -90,7 +104,8 @@ class OpenScienti(HunabkuPluginBase):
         try:
             data = {}
             data["ids"] = self.db["cvlac_data"].distinct("id_persona_pr")
-            data["dataset_info"] = self.db["cvlac_dataset_info"].find_one({},{"_id":0})
+            data["dataset_info"] = self.db["cvlac_dataset_info"].find_one({}, {
+                                                                          "_id": 0})
             response = self.app.response_class(
                 response=self.json.dumps(data),
                 status=200,
