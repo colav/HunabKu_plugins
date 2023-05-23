@@ -59,6 +59,7 @@ class SIIU(HunabkuPluginBase):
         @apiParam {String} group_code  Colciencias Group ID ex:"COL0008423"
         @apiParam {String} group_name  name of the research group (returns the projects for this group)
         @apiParam {String} participant_name  name of the project participant (returns the projects for this participant)
+        @apiParam {String} participant_id  id of the participant (returns the projects for this participant)
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -74,8 +75,10 @@ class SIIU(HunabkuPluginBase):
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&group_code=COL0008423
             # An projects given a group name
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&group_name="psicologia cognitiva"
-            # An projects given a group name
+            # An projects given a participant name
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&participant_name="Diego Alejandro Restrepo Quintero"
+            # An projects given a participant id
+            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&participant_id="xxxx"
 
         """
         if self.valid_apikey():
@@ -85,6 +88,7 @@ class SIIU(HunabkuPluginBase):
             grp_codigo = self.request.args.get('group_code')
             group_name = self.request.args.get('group_name')
             participant_name = self.request.args.get('participant_name')
+            participant_id = self.request.args.get('participant_id')
 
             if keyword:
                 check = self.check_index()
@@ -133,6 +137,15 @@ class SIIU(HunabkuPluginBase):
             if grp_codigo:
                 data = list(self.dbclient[self.config.mdb_name]
                             ["project"].find({"project_participant.group.CODIGO_COLCIENCIAS": grp_codigo}, {"_id": 0}))
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=200,
+                    mimetype='application/json'
+                )
+                return response
+            if participant_id:
+                data = list(self.dbclient[self.config.mdb_name]
+                            ["project"].find({"project_participant.PERSONA_NATURAL": participant_id}, {"_id": 0}))
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=200,
