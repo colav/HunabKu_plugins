@@ -30,6 +30,17 @@ class SIIU(HunabkuPluginBase):
         else:
             self.es = Elasticsearch(self.config.es_uri, basic_auth=auth)
 
+    def check_index(self):
+        if not self.es.indices.exists(index=self.config.es_project_index):
+            response = self.app.response_class(
+                response=self.json.dumps(
+                    {"msg": f"Internal error, index {self.config.es_project_index} not found in Elastic Search"}),
+                status=500,
+                mimetype='application/json'
+            )
+            return response
+        return None
+
     @endpoint('/siiu/project', methods=['GET'])
     def siiu_project(self):
         """
@@ -47,6 +58,7 @@ class SIIU(HunabkuPluginBase):
         @apiParam {String} CODIGO  project id.
         @apiParam {String} group_code  Colciencias Group ID ex:"COL0008423"
         @apiParam {String} group_name  name of the research group (returns the projects for this group)
+        @apiParam {String} participant_name  name of the project participant (returns the projects for this participant)
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -62,6 +74,8 @@ class SIIU(HunabkuPluginBase):
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&group_code=COL0008423
             # An projects given a group name
             curl -i http://apis.colav.co/siiu/project?apikey=XXXX&group_name="psicologia cognitiva"
+            # An projects given a group name
+            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&participant_name="Diego Alejandro Restrepo Quintero"
 
         """
         if self.valid_apikey():
@@ -70,15 +84,13 @@ class SIIU(HunabkuPluginBase):
             codigo = self.request.args.get('CODIGO')
             grp_codigo = self.request.args.get('group_code')
             group_name = self.request.args.get('group_name')
+            participant_name = self.request.args.get('participant_name')
+
             if keyword:
-                if not self.es.indices.exists(index=self.config.es_project_index):
-                    response = self.app.response_class(
-                        response=self.json.dumps(
-                            {"msg": f"Internal error, index {self.config.es_project_index} not found in Elastic Search"}),
-                        status=500,
-                        mimetype='application/json'
-                    )
-                    return response
+                check = self.check_index()
+                if check is not None:
+                    return check
+
                 body = {"query": {
                     "bool": {
                         "should": [
@@ -129,20 +141,50 @@ class SIIU(HunabkuPluginBase):
                 return response
 
             if group_name:
-                if not self.es.indices.exists(index=self.config.es_project_index):
-                    response = self.app.response_class(
-                        response=self.json.dumps(
-                            {"msg": f"Internal error, index {self.config.es_project_index} not found in Elastic Search"}),
-                        status=500,
-                        mimetype='application/json'
-                    )
-                    return response
+                check = self.check_index()
+                if check is not None:
+                    return check
                 body = {
                     "query": {
                         "bool": {
                             "must": [
                                 {"match_phrase": {
                                     "project_participant.group.NOMBRE_COMPLETO": group_name}},
+                            ]
+                        }
+                    }
+                }
+
+                # get the start time
+                st = time.time()
+                s = Search(using=self.es, index=self.config.es_project_index)
+                s = s.update_from_dict(body)
+                s = s.extra(track_total_hits=True)
+                s.execute()
+                data = [hit.to_dict() for hit in s.scan()]
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=200,
+                    mimetype='application/json'
+                )
+                # get the end time
+                et = time.time()
+                # get the execution time
+                elapsed_time = et - st
+                print(f'Search for "{group_name}" Execution time:',
+                      elapsed_time, 'seconds')
+                return response
+
+            if participant_name:
+                check = self.check_index()
+                if check is not None:
+                    return check
+                body = {
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {"match_phrase": {
+                                    "project_participant.NOMBRE_COMPLETO": participant_name}},
                             ]
                         }
                     }
