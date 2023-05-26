@@ -10,13 +10,13 @@ class International(HunabkuPluginBase):
     config = Config()
     config += Param(db_uri="mongodb://localhost:27017/",
                     doc="MongoDB string connection")
-    
+
     config += Param(db_name="international",
                     doc="Mongo DB name")
-    
+
     config += Param(mobility_collection_name="international_mobility",
                     doc="Mongo DB collection")
-    
+
     config += Param(agreements_collection_name="agreements_raw",
                     doc="Mongo DB collection")
 
@@ -26,7 +26,6 @@ class International(HunabkuPluginBase):
         self.db = self.dbclient[self.config.db_name]
         self.mobility_collection = self.db[self.config.mobility_collection_name]
         self.agreements_collection = self.db[self.config.agreements_collection_name]
-
 
     @endpoint('/agreements', methods=['GET'])
     def get_agreements(self):
@@ -53,7 +52,7 @@ class International(HunabkuPluginBase):
             return self.get_agreements_json()
         else:
             return self.badrequest_error()
-        
+
     def get_agreements_json(self):
         data = list(self.agreements_collection.find())
         response = self.app.response_class(
@@ -70,7 +69,8 @@ class International(HunabkuPluginBase):
             keys = data[0].keys()
 
             response = Response(content_type='text/csv')
-            response.headers.set('Content-Disposition', 'attachment', filename='agreements.csv')
+            response.headers.set('Content-Disposition',
+                                 'attachment', filename='agreements.csv')
 
             writer = csv.DictWriter(response.stream, fieldnames=keys)
             writer.writeheader()
@@ -83,7 +83,6 @@ class International(HunabkuPluginBase):
                 status=404,
                 mimetype='application/json'
             )
-        
 
     @endpoint('/mobility', methods=['GET'])
     def get_mobility(self):
@@ -94,8 +93,8 @@ class International(HunabkuPluginBase):
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String="json","csv"} format="json" Response format
-        
-        
+
+
         @apiSuccess {Object|file} mobility International mobility records in JSON or CSV format.
 
         """
@@ -128,7 +127,8 @@ class International(HunabkuPluginBase):
             keys = data[0].keys()
 
             response = Response(content_type='text/csv')
-            response.headers.set('Content-Disposition', 'attachment', filename='international_mobility.csv')
+            response.headers.set(
+                'Content-Disposition', 'attachment', filename='international_mobility.csv')
 
             writer = csv.DictWriter(response.stream, fieldnames=keys)
             writer.writeheader()

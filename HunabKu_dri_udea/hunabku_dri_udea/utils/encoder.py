@@ -1,6 +1,7 @@
 from json import JSONEncoder
 from bson import ObjectId
 
+
 class JsonEncoder(JSONEncoder):
     """
     Custom JSON encoder
