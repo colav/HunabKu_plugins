@@ -495,7 +495,7 @@ class Scienti(HunabkuPluginBase):
     def scienti_patent(self):
         """
         @api {get} /scienti/patent Scienti patent endpoint
-        @apiName event
+        @apiName patent
         @apiGroup Scienti
         @apiDescription Allows to perform queries for patents,
                         model_year is mandatory parameter, if model year is the only
@@ -503,7 +503,7 @@ class Scienti(HunabkuPluginBase):
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} COD_RH  User primary key
-        @apiParam {String} COD_PATENTE  event key (require COD_RH)
+        @apiParam {String} COD_PATENTE  patent key (require COD_RH)
         @apiParam {String} SGL_CATEGORIA  category of the network
         @apiParam {String} model_year  year of the scienti model, example: 2022
         @apiParam {String} institution institution initials. supported example: udea, uec, unaula
