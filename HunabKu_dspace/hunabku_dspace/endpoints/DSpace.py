@@ -90,7 +90,7 @@ class DSpace(HunabkuPluginBase):
             # all the products for the institution
             curl -i http://apis.colav.co/dspace/product?apikey=XXXX&institution=udea
             # An specific product
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&institution=udea&id=oai:bibliotecadigital.udea.edu.co:10495/1489
+            curl -i http://apis.colav.co/dspace/product?apikey=XXXX&institution=udea&id=oai:bibliotecadigital.udea.edu.co:10495/1489
         """
 
         if self.valid_apikey():
@@ -164,7 +164,7 @@ class DSpace(HunabkuPluginBase):
         @apiError (Error 400) msg  Bad request, if the query is not right.
 
         @apiExample {curl} Example usage:
-            # resume of scienti data bases and model_years
+            # resume of dspace database
             curl -i http://apis.colav.co/dspace/info?apikey=XXXX&get=resume
             curl -i http://apis.colav.co/dspace/info?apikey=XXXX&get=ids&institution=udea
         """
