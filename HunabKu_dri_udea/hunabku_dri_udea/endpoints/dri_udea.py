@@ -1,5 +1,4 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
-from hunabku_dri_udea.utils.encoder import JsonEncoder
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
 from flask import Response, request
@@ -56,7 +55,7 @@ class International(HunabkuPluginBase):
     def get_agreements_json(self):
         data = list(self.agreements_collection.find())
         response = self.app.response_class(
-            response=self.json.dumps(data, cls=JsonEncoder),
+            response=self.json.dumps(data, default=str, ensure_ascii=False),
             status=200,
             mimetype='application/json'
         )
@@ -114,7 +113,7 @@ class International(HunabkuPluginBase):
     def get_mobility_json(self):
         data = list(self.mobility_collection.find())
         response = self.app.response_class(
-            response=self.json.dumps(data, cls=JsonEncoder),
+            response=self.json.dumps(data, default=str, ensure_ascii=False),
             status=200,
             mimetype='application/json'
         )
