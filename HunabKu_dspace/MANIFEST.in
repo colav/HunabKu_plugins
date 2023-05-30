@@ -1,0 +1,2 @@
+recursive-include hunabku_dspace/ *.py
+recursive-include hunabku_dspace/ *.*
