@@ -19,12 +19,26 @@ class International(HunabkuPluginBase):
     config += Param(agreements_collection_name="agreements_raw",
                     doc="Mongo DB collection")
 
+    config += Param(apikey="colav",
+                    doc="Plugin API key")
+
     def __init__(self, hunabku):
         super().__init__(hunabku)
         self.dbclient = MongoClient(self.config.db_uri)
         self.db = self.dbclient[self.config.db_name]
         self.mobility_collection = self.db[self.config.mobility_collection_name]
         self.agreements_collection = self.db[self.config.agreements_collection_name]
+        self.apikey = self.config.apikey
+
+    def valid_apikey(self):
+        if self.request.method == 'POST':
+            apikey = self.request.form.get('apikey')
+        else:
+            apikey = self.request.args.get('apikey')
+        if self.apikey == apikey:
+            return True
+        else:
+            return False
 
     @endpoint('/agreements', methods=['GET'])
     def get_agreements(self):
