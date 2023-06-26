@@ -91,7 +91,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} COD_PRODUCTO  Product key (require COD_RH)
         @apiParam {String} SGL_CATEGORIA  Category of the product
         @apiParam {String} model_year  Year of the scienti model, example: 2022
-        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -194,7 +194,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} COD_RED  network key (require COD_RH)
         @apiParam {String} SGL_CATEGORIA  category of the network
         @apiParam {String} model_year  year of the scienti model, example: 2022
-        @apiParam {String} institution institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -299,7 +299,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} COD_PROYECTO  project key (require COD_RH)
         @apiParam {String} SGL_CATEGORIA  category of the network
         @apiParam {String} model_year  year of the scienti model, example: 2022
-        @apiParam {String} institution institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -403,7 +403,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} COD_EVENTO  event key (require COD_RH)
         @apiParam {String} SGL_CATEGORIA  category of the network
         @apiParam {String} model_year  year of the scienti model, example: 2022
-        @apiParam {String} institution institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -506,7 +506,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} COD_PATENTE  patent key (require COD_RH)
         @apiParam {String} SGL_CATEGORIA  category of the network
         @apiParam {String} model_year  year of the scienti model, example: 2022
-        @apiParam {String} institution institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -605,7 +605,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} get Options are resume and ids, ids require additional parameters model_year and institution
         @apiParam {String} model_year  Year of the scienti model, example: 2022
-        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
