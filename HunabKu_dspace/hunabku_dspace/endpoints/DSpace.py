@@ -27,7 +27,7 @@ class DSpace(HunabkuPluginBase):
         if not institution:
             # institution required
             data = {"error": "Bad Request",
-                    "message": "institution parameter is required, it was not provided. options are: udea, unaula, uec"}
+                    "message": "institution parameter is required, it was not provided. options are: udea, unaula, uec, univalle"}
             response = self.app.response_class(
                 response=self.json.dumps(data),
                 status=400,
@@ -79,7 +79,7 @@ class DSpace(HunabkuPluginBase):
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} id  DSpace id of the product
-        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -156,7 +156,7 @@ class DSpace(HunabkuPluginBase):
                         about avialable institution and ids.
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} get Options are resume and ids, ids require additional parameter institution
-        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula
+        @apiParam {String} institution Institution initials. supported example: udea, uec, unaula, univalle
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
