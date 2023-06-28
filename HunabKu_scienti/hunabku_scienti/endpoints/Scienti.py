@@ -1,18 +1,33 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
+from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, __version__ as es_version
+from elasticsearch_dsl import Search
 import sys
 import re
+import time
 
 
 class Scienti(HunabkuPluginBase):
     config = Config()
     config += Param(db_uri="mongodb://localhost:27017/",
                     doc="MongoDB string connection")
+    config += Param(es_uri="http://localhost:9200",
+                    doc="Elastic Search url")
+    config += Param(es_user="elastic",
+                    doc="Elastic Search user")
+    config += Param(es_pass="",
+                    doc="Elastic Search password")
 
     def __init__(self, hunabku):
         super().__init__(hunabku)
         self.dbclient = MongoClient(self.config.db_uri)
+        auth = (self.config.es_user, self.config.es_pass)
+        if es_version[0] < 8:
+            self.es = Elasticsearch(self.config.es_uri, http_auth=auth)
+        else:
+            self.es = Elasticsearch(self.config.es_uri, basic_auth=auth)
 
     def check_required_parameters(self, req_args):
         """
@@ -92,6 +107,8 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} SGL_CATEGORIA  Category of the product
         @apiParam {String} model_year  Year of the scienti model, example: 2022
         @apiParam {String} institution Institution initials. supported example: udea, uec, unaula, univalle
+        @apiParam {String} search Allows to search text keywords in several fields of the product collection using elastic search.
+
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -104,7 +121,11 @@ class Scienti(HunabkuPluginBase):
             # An specific product
             curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000639&COD_PRODUCTO=24
             # An specific product category
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea
+            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=ART-ART_A1
+            # Text search for a keyword using elastic search
+            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
+
+
         """
 
         if self.valid_apikey():
@@ -113,12 +134,13 @@ class Scienti(HunabkuPluginBase):
             sgl_cat = self.request.args.get('SGL_CATEGORIA')
             model_year = self.request.args.get('model_year')
             institution = self.request.args.get('institution')
+            keyword = self.request.args.get('search')
 
             response = self.check_required_parameters(self.request.args)
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['apikey', 'COD_RH', 'COD_PRODUCTO', 'SGL_CATEGORIA', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PRODUCTO', 'SGL_CATEGORIA', 'model_year', 'institution', 'search'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -158,7 +180,63 @@ class Scienti(HunabkuPluginBase):
                         mimetype='application/json'
                     )
                     return response
+                if keyword:
+                    es_index = f'scienti_{institution}_{model_year}_product'
 
+                    # not required extra fields for search, at least for product
+                    # article, audiovisual, book, book_chapter, event, journal, journal_others, music_sheet
+                    # oriented_thesis
+                    body = {
+                        "query": {
+                            "multi_match": {
+                                "query":    keyword,
+                                "type":     "phrase_prefix",
+                                "fields": ["TXT_NME_PROD",
+                                           "TXT_RESUMEN_PROD",
+                                           "TXT_OBSERV_PROD",
+                                           "DSC_PROJETO",
+                                           # campos application_sector (es recursivo a 3 niveles)
+                                           # https://github.com/colav/KayPacha/blob/main/kaypacha/models/scienti/graph_schema_product.py#L636
+                                           "details.application_sector.TXT_NME_SECTOR_APLIC",
+                                           "details.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
+                                           "details.application_sector.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
+                                           # community
+                                           "details.community.TXT_CARACTERIZACION",
+                                           # course
+                                           "details.course.TXT_FINALIDAD",
+                                           # keywords
+                                           "details.keywords.TXT_NME_PALABRA_CLAVE",
+                                           # memory chapter
+                                           "details.memory_chapter.TXT_NME_PONENCIA",
+                                           "details.memory_chapter.TXT_NME_EVENTO",
+                                           # prod_art
+                                           "details.prod_art.prod_art_detail.TXT_NME_EVENTO",
+                                           "details.prod_art.prod_art_detail.knowledge_area.TXT_NME_AREA_FULL",
+                                           # technical
+                                           "details.technical.TXT_NME_COMERCIAL",
+                                           "details.technical.TXT_FINALIDAD"]
+                            },
+                        }
+                    }
+                    # get the start time
+                    st = time.time()
+                    s = Search(using=self.es, index=es_index)
+                    s = s.update_from_dict(body)
+                    s = s.extra(track_total_hits=True)
+                    s.execute()
+                    data = [hit.to_dict() for hit in s.scan()]
+                    # get the end time
+                    et = time.time()
+                    # get the execution time
+                    elapsed_time = et - st
+                    print(f'Search for "{keyword}" Execution time:',
+                          elapsed_time, 'seconds')
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
                 data = {
                     "error": "Bad Request", "message": "invalid parameters, please select the right combination of parameters."}
                 response = self.app.response_class(
