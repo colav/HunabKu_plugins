@@ -85,7 +85,7 @@ def main():
             'hunabku',
             'pymongo',
             'elasticsearch>=7.0.0',
-            'elasticsearch-dsl>=7.0.0' #there is not release for es 8 yet, but it works.
+            'elasticsearch-dsl>=7.0.0'  # there is not release for es 8 yet, but it works.
         ],
     )
 

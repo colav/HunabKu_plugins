@@ -1,7 +1,6 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
-from elasticsearch import Elasticsearch
 from elasticsearch import Elasticsearch, __version__ as es_version
 from elasticsearch_dsl import Search
 import sys
@@ -189,8 +188,8 @@ class Scienti(HunabkuPluginBase):
                     body = {
                         "query": {
                             "multi_match": {
-                                "query":    keyword,
-                                "type":     "phrase_prefix",
+                                "query": keyword,
+                                "type": "phrase_prefix",
                                 "fields": ["TXT_NME_PROD",
                                            "TXT_RESUMEN_PROD",
                                            "TXT_OBSERV_PROD",
