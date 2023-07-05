@@ -627,6 +627,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} SGL_CATEGORIA  category of the network
         @apiParam {String} model_year  year of the scienti model, example: 2022
         @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
+        @apiParam {String} search Allows to search text keywords in several fields of the patent collection using elastic search.
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -640,6 +641,8 @@ class Scienti(HunabkuPluginBase):
             curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000204234&COD_PATENTE=2
             # An specific patent category
             curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=PIV-00
+            # Text search for a keyword using elastic search
+            curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&search="process"
         """
         if self.valid_apikey():
             cod_rh = self.request.args.get('COD_RH')
@@ -647,12 +650,13 @@ class Scienti(HunabkuPluginBase):
             sgl_cat = self.request.args.get('SGL_CATEGORIA')
             model_year = self.request.args.get('model_year')
             institution = self.request.args.get('institution')
+            keyword = self.request.args.get('search')
 
             response = self.check_required_parameters(self.request.args)
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['apikey', 'COD_RH', 'COD_PROYECTO', 'COD_PATENTE', 'model_year', 'institution'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PROYECTO', 'COD_PATENTE', 'model_year', 'institution', 'search'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -692,7 +696,43 @@ class Scienti(HunabkuPluginBase):
                         mimetype='application/json'
                     )
                     return response
+                if keyword:
+                    es_index = f'scienti_{institution}_{model_year}_patent'
 
+                    # only required field for search is technical, at least for patent.
+                    body = {
+                        "query": {
+                            "multi_match": {
+                                "query":    keyword,
+                                "type":     "phrase_prefix",
+                                "fields": ["TXT_NME_PATENTE",
+                                           "details.technical.product.TXT_NME_PROD",
+                                           "details.technical.product.TXT_RESUMEN_PROD",
+                                           "details.technical.product.TXT_OBSERV_PROD",
+                                           "details.technical.product.DSC_PROJETO"
+                                           ]
+                            },
+                        }
+                    }
+                    # get the start time
+                    st = time.time()
+                    s = Search(using=self.es, index=es_index)
+                    s = s.update_from_dict(body)
+                    s = s.extra(track_total_hits=True)
+                    s.execute()
+                    data = [hit.to_dict() for hit in s.scan()]
+                    # get the end time
+                    et = time.time()
+                    # get the execution time
+                    elapsed_time = et - st
+                    print(f'Search for "{keyword}" Execution time:',
+                          elapsed_time, 'seconds')
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
                 data = {
                     "error": "Bad Request", "message": "invalid parameters, please select the right combination of parameters"}
                 response = self.app.response_class(
