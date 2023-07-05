@@ -703,8 +703,8 @@ class Scienti(HunabkuPluginBase):
                     body = {
                         "query": {
                             "multi_match": {
-                                "query":    keyword,
-                                "type":     "phrase_prefix",
+                                "query": keyword,
+                                "type": "phrase_prefix",
                                 "fields": ["TXT_NME_PATENTE",
                                            "details.technical.product.TXT_NME_PROD",
                                            "details.technical.product.TXT_RESUMEN_PROD",
