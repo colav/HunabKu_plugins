@@ -107,7 +107,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} model_year  Year of the scienti model, example: 2022
         @apiParam {String} institution Institution initials. supported example: udea, uec, unaula, univalle
         @apiParam {String} search Allows to search text keywords in several fields of the product collection using elastic search.
-        @apiParam {String} group_id  Group id.
+        @apiParam {String} group_id  Returns products for the given group id.
 
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
@@ -124,7 +124,7 @@ class Scienti(HunabkuPluginBase):
             curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=ART-ART_A1
             # Text search for a keyword using elastic search
             curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
-            # Text search by group given the group code
+            # return products for the given group id
             curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
 
 
@@ -449,6 +449,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} model_year  year of the scienti model, example: 2022
         @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
         @apiParam {String} search Allows to search text keywords in several fields of the project collection using elastic search.
+        @apiParam {String} group_id  Returns projects for the given group id.
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -464,6 +465,9 @@ class Scienti(HunabkuPluginBase):
             curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=PID-00
             # Text search for a keyword using elastic search
             curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
+            # return projects for the given group id
+            curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
+
         """
 
         if self.valid_apikey():
@@ -473,12 +477,13 @@ class Scienti(HunabkuPluginBase):
             model_year = self.request.args.get('model_year')
             institution = self.request.args.get('institution')
             keyword = self.request.args.get('search')
+            group_id = self.request.args.get('group_id')
 
             response = self.check_required_parameters(self.request.args)
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['apikey', 'COD_RH', 'COD_PROYECTO', 'SGL_CATEGORIA', 'model_year', 'institution', 'search'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PROYECTO', 'SGL_CATEGORIA', 'model_year', 'institution', 'search', 'group_id'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -558,6 +563,17 @@ class Scienti(HunabkuPluginBase):
                         mimetype='application/json'
                     )
                     return response
+
+                if group_id:
+                    data = list(self.db["project"].find(
+                        {'group.COD_ID_GRUPO': group_id}, {"_id": 0}))
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
+
                 data = {
                     "error": "Bad Request", "message": "invalid parameters, please select the right combination of parameters"}
                 response = self.app.response_class(
