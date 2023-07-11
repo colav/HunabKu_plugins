@@ -287,6 +287,7 @@ class Scienti(HunabkuPluginBase):
         @apiParam {String} model_year  year of the scienti model, example: 2022
         @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
         @apiParam {String} search Allows to search text keywords in several fields of the network collection using elastic search.
+        @apiParam {String} group_id  Returns networks for the given group id.
 
         @apiSuccess {Object}  Resgisters from MongoDB in Json format.
 
@@ -302,6 +303,9 @@ class Scienti(HunabkuPluginBase):
             curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=RC-RC_A
             # Text search for a keyword using elastic search
             curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&search="educación"
+            # return networks for the given group id
+            curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0053803
+
         """
 
         if self.valid_apikey():
@@ -311,12 +315,13 @@ class Scienti(HunabkuPluginBase):
             model_year = self.request.args.get('model_year')
             institution = self.request.args.get('institution')
             keyword = self.request.args.get('search')
+            group_id = self.request.args.get('group_id')
 
             response = self.check_required_parameters(self.request.args)
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['apikey', 'COD_RH', 'COD_RED', 'SGL_CATEGORIA', 'model_year', 'institution', 'search'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_RED', 'SGL_CATEGORIA', 'model_year', 'institution', 'search', 'group_id'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -411,6 +416,16 @@ class Scienti(HunabkuPluginBase):
                         mimetype='application/json'
                     )
                     return response
+                if group_id:
+                    data = list(self.db["network"].find(
+                        {'group.COD_ID_GRUPO': group_id}, {"_id": 0}))
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
+
                 data = {
                     "error": "Bad Request", "message": "invalid parameters, please select the right combination of parameters"}
                 response = self.app.response_class(
