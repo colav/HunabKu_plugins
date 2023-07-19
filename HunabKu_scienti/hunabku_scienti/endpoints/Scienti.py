@@ -90,6 +90,26 @@ class Scienti(HunabkuPluginBase):
             return response
         return None
 
+    def es_multi_match(self, keyword, fields, es_index):
+        """
+        Method to perform the elasticsearch multi_match query.
+        """
+        body = {
+            "query": {
+                "multi_match": {
+                    "query": keyword,
+                    "type": "phrase_prefix",
+                    "fields": fields
+                },
+            }
+        }
+        s = Search(using=self.es, index=es_index)
+        s = s.update_from_dict(body)
+        s = s.extra(track_total_hits=True)
+        s.execute()
+        data = [hit.to_dict() for hit in s.scan()]
+        return data
+
     @endpoint('/scienti/product', methods=['GET'])
     def scienti_product(self):
         """
@@ -189,50 +209,39 @@ class Scienti(HunabkuPluginBase):
                     # not required extra fields for search, at least for product
                     # article, audiovisual, book, book_chapter, event, journal, journal_others, music_sheet
                     # oriented_thesis
-                    body = {
-                        "query": {
-                            "multi_match": {
-                                "query": keyword,
-                                "type": "phrase_prefix",
-                                "fields": ["TXT_NME_PROD",
-                                           "TXT_RESUMEN_PROD",
-                                           "TXT_OBSERV_PROD",
-                                           "DSC_PROJETO",
-                                           # campos application_sector (es recursivo a 3 niveles)
-                                           # https://github.com/colav/KayPacha/blob/main/kaypacha/models/scienti/graph_schema_product.py#L636
-                                           "details.application_sector.TXT_NME_SECTOR_APLIC",
-                                           "details.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
-                                           "details.application_sector.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
-                                           # community
-                                           "details.community.TXT_CARACTERIZACION",
-                                           # course
-                                           "details.course.TXT_FINALIDAD",
-                                           # keywords
-                                           "details.keywords.TXT_NME_PALABRA_CLAVE",
-                                           # memory chapter
-                                           "details.memory_chapter.TXT_NME_PONENCIA",
-                                           "details.memory_chapter.TXT_NME_EVENTO",
-                                           # prod_art
-                                           "details.prod_art.prod_art_detail.TXT_NME_EVENTO",
-                                           "details.prod_art.prod_art_detail.knowledge_area.TXT_NME_AREA_FULL",
-                                           # technical
-                                           "details.technical.TXT_NME_COMERCIAL",
-                                           "details.technical.TXT_FINALIDAD"]
-                            },
-                        }
-                    }
+                    fields = ["TXT_NME_PROD",
+                              "TXT_RESUMEN_PROD",
+                              "TXT_OBSERV_PROD",
+                              "DSC_PROJETO",
+                              # campos application_sector (es recursivo a 3 niveles)
+                              # https://github.com/colav/KayPacha/blob/main/kaypacha/models/scienti/graph_schema_product.py#L636
+                              "details.application_sector.TXT_NME_SECTOR_APLIC",
+                              "details.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
+                              "details.application_sector.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
+                              # community
+                              "details.community.TXT_CARACTERIZACION",
+                              # course
+                              "details.course.TXT_FINALIDAD",
+                              # keywords
+                              "details.keywords.TXT_NME_PALABRA_CLAVE",
+                              # memory chapter
+                              "details.memory_chapter.TXT_NME_PONENCIA",
+                              "details.memory_chapter.TXT_NME_EVENTO",
+                              # prod_art
+                              "details.prod_art.prod_art_detail.TXT_NME_EVENTO",
+                              "details.prod_art.prod_art_detail.knowledge_area.TXT_NME_AREA_FULL",
+                              # technical
+                              "details.technical.TXT_NME_COMERCIAL",
+                              "details.technical.TXT_FINALIDAD"]
+
                     # get the start time
                     st = time.time()
-                    s = Search(using=self.es, index=es_index)
-                    s = s.update_from_dict(body)
-                    s = s.extra(track_total_hits=True)
-                    s.execute()
-                    data = [hit.to_dict() for hit in s.scan()]
+                    data = self.es_multi_match(keyword, fields, es_index)
                     # get the end time
                     et = time.time()
                     # get the execution time
                     elapsed_time = et - st
-                    print(f'Search for "{keyword}" Execution time:',
+                    print(f'Search for "{keyword}" in {es_index} Execution time:',
                           elapsed_time, 'seconds')
                     response = self.app.response_class(
                         response=self.json.dumps(data),
@@ -365,45 +374,34 @@ class Scienti(HunabkuPluginBase):
                 if keyword:
                     es_index = f'scienti_{institution}_{model_year}_network'
 
-                    body = {
-                        "query": {
-                            "multi_match": {
-                                "query": keyword,
-                                "type": "phrase_prefix",
-                                "fields": ["TXT_NME_RED",
-                                           "details.community.TXT_NME_COMUNIDAD",
-                                           "details.community.TXT_CARACTERIZACION",
-                                           "details.community.product.TXT_NME_PROD",
-                                           "details.community.product.TXT_RESUMEN_PROD",
-                                           "details.community.product.TXT_OBSERV_PROD",
-                                           "details.community.product.DSC_PROJETO",
-                                           "details.community.project.TXT_NME_PROYECTO",
-                                           "details.community.project.TXT_OBSERV_PROYECTO",
-                                           "details.community.project.TXT_RESUMEN_PROYECTO",
-                                           "group.NME_GRUPO",
-                                           "group.TXT_PLAN_TRABAJO",
-                                           "group.TXT_ESTADO_ARTE",
-                                           "group.TXT_OBJETIVOS",
-                                           "group.TXT_PROD_DESTACADA",
-                                           "group.TXT_RETOS",
-                                           "group.TXT_VISION",
-                                           "group.knowledge_area.TXT_NME_AREA",  # recursive level 0
-                                           "group.knowledge_area.TXT_NME_AREA_FULL"
-                                           "group.knowledge_area.knowledge_area.TXT_NME_AREA",  # level 1
-                                           "group.knowledge_area.knowledge_area.TXT_NME_AREA_FULL"
-                                           "group.knowledge_area.knowledge_area.knowledge_area.TXT_NME_AREA",  # level 3
-                                           "group.knowledge_area.knowledge_area.knowledge_area.TXT_NME_AREA_FULL"
-                                           ]
-                            },
-                        }
-                    }
+                    fields = ["TXT_NME_RED",
+                              "details.community.TXT_NME_COMUNIDAD",
+                              "details.community.TXT_CARACTERIZACION",
+                              "details.community.product.TXT_NME_PROD",
+                              "details.community.product.TXT_RESUMEN_PROD",
+                              "details.community.product.TXT_OBSERV_PROD",
+                              "details.community.product.DSC_PROJETO",
+                              "details.community.project.TXT_NME_PROYECTO",
+                              "details.community.project.TXT_OBSERV_PROYECTO",
+                              "details.community.project.TXT_RESUMEN_PROYECTO",
+                              "group.NME_GRUPO",
+                              "group.TXT_PLAN_TRABAJO",
+                              "group.TXT_ESTADO_ARTE",
+                              "group.TXT_OBJETIVOS",
+                              "group.TXT_PROD_DESTACADA",
+                              "group.TXT_RETOS",
+                              "group.TXT_VISION",
+                              "group.knowledge_area.TXT_NME_AREA",  # recursive level 0
+                              "group.knowledge_area.TXT_NME_AREA_FULL"
+                              "group.knowledge_area.knowledge_area.TXT_NME_AREA",  # level 1
+                              "group.knowledge_area.knowledge_area.TXT_NME_AREA_FULL"
+                              "group.knowledge_area.knowledge_area.knowledge_area.TXT_NME_AREA",  # level 3
+                              "group.knowledge_area.knowledge_area.knowledge_area.TXT_NME_AREA_FULL"
+                              ]
+
                     # get the start time
                     st = time.time()
-                    s = Search(using=self.es, index=es_index)
-                    s = s.update_from_dict(body)
-                    s = s.extra(track_total_hits=True)
-                    s.execute()
-                    data = [hit.to_dict() for hit in s.scan()]
+                    data = self.es_multi_match(keyword, fields, es_index)
                     # get the end time
                     et = time.time()
                     # get the execution time
@@ -542,30 +540,18 @@ class Scienti(HunabkuPluginBase):
                     es_index = f'scienti_{institution}_{model_year}_project'
 
                     # only required fields for search are product and community, at least for project.
-                    body = {
-                        "query": {
-                            "multi_match": {
-                                "query": keyword,
-                                "type": "phrase_prefix",
-                                "fields": ["TXT_NME_PROYECTO",
-                                           "TXT_OBSERV_PROYECTO",
-                                           "TXT_RESUMEN_PROYECTO",
-                                           "details.product.TXT_NME_PROD",
-                                           "details.product.TXT_RESUMEN_PROD",
-                                           "details.product.TXT_OBSERV_PROD",
-                                           "details.product.DSC_PROJETO",
-                                           "details.community.TXT_NME_COMUNIDAD",
-                                           "details.community.TXT_CARACTERIZACION"]
-                            },
-                        }
-                    }
+                    fields = ["TXT_NME_PROYECTO",
+                              "TXT_OBSERV_PROYECTO",
+                              "TXT_RESUMEN_PROYECTO",
+                              "details.product.TXT_NME_PROD",
+                              "details.product.TXT_RESUMEN_PROD",
+                              "details.product.TXT_OBSERV_PROD",
+                              "details.product.DSC_PROJETO",
+                              "details.community.TXT_NME_COMUNIDAD",
+                              "details.community.TXT_CARACTERIZACION"]
                     # get the start time
                     st = time.time()
-                    s = Search(using=self.es, index=es_index)
-                    s = s.update_from_dict(body)
-                    s = s.extra(track_total_hits=True)
-                    s.execute()
-                    data = [hit.to_dict() for hit in s.scan()]
+                    data = self.es_multi_match(keyword, fields, es_index)
                     # get the end time
                     et = time.time()
                     # get the execution time
@@ -703,34 +689,22 @@ class Scienti(HunabkuPluginBase):
                 if keyword:
                     es_index = f'scienti_{institution}_{model_year}_event'
 
-                    body = {
-                        "query": {
-                            "multi_match": {
-                                "query": keyword,
-                                "type": "phrase_prefix",
-                                "fields": ["TXT_NME_EVENTO",
-                                           "TXT_RESUMEN_EVENTO",
-                                           "TXT_ACTIVIDADES",
-                                           "project.TXT_NME_PROYECTO",
-                                           "project.TXT_RESUMEN_PROYECTO",
-                                           "details.product.TXT_NME_PROD",
-                                           "details.product.TXT_RESUMEN_PROD",
-                                           "details.product.TXT_OBSERV_PROD",
-                                           "details.product.DSC_PROJETO",
-                                           "details.keywords.TXT_NME_PALABRA_CLAVE",
-                                           "details.application_sector.TXT_NME_SECTOR_APLIC",  # recursive 2 times
-                                           "details.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
-                                           ]
-                            },
-                        }
-                    }
+                    fields = ["TXT_NME_EVENTO",
+                              "TXT_RESUMEN_EVENTO",
+                              "TXT_ACTIVIDADES",
+                              "project.TXT_NME_PROYECTO",
+                              "project.TXT_RESUMEN_PROYECTO",
+                              "details.product.TXT_NME_PROD",
+                              "details.product.TXT_RESUMEN_PROD",
+                              "details.product.TXT_OBSERV_PROD",
+                              "details.product.DSC_PROJETO",
+                              "details.keywords.TXT_NME_PALABRA_CLAVE",
+                              "details.application_sector.TXT_NME_SECTOR_APLIC",  # recursive 2 times
+                              "details.application_sector.application_sector.TXT_NME_SECTOR_APLIC",
+                              ]
                     # get the start time
                     st = time.time()
-                    s = Search(using=self.es, index=es_index)
-                    s = s.update_from_dict(body)
-                    s = s.extra(track_total_hits=True)
-                    s.execute()
-                    data = [hit.to_dict() for hit in s.scan()]
+                    data = self.es_multi_match(keyword, fields, es_index)
                     # get the end time
                     et = time.time()
                     # get the execution time
@@ -863,27 +837,15 @@ class Scienti(HunabkuPluginBase):
                     es_index = f'scienti_{institution}_{model_year}_patent'
 
                     # only required field for search is technical, at least for patent.
-                    body = {
-                        "query": {
-                            "multi_match": {
-                                "query": keyword,
-                                "type": "phrase_prefix",
-                                "fields": ["TXT_NME_PATENTE",
-                                           "details.technical.product.TXT_NME_PROD",
-                                           "details.technical.product.TXT_RESUMEN_PROD",
-                                           "details.technical.product.TXT_OBSERV_PROD",
-                                           "details.technical.product.DSC_PROJETO"
-                                           ]
-                            },
-                        }
-                    }
+                    fields = ["TXT_NME_PATENTE",
+                              "details.technical.product.TXT_NME_PROD",
+                              "details.technical.product.TXT_RESUMEN_PROD",
+                              "details.technical.product.TXT_OBSERV_PROD",
+                              "details.technical.product.DSC_PROJETO"
+                              ]
                     # get the start time
                     st = time.time()
-                    s = Search(using=self.es, index=es_index)
-                    s = s.update_from_dict(body)
-                    s = s.extra(track_total_hits=True)
-                    s.execute()
-                    data = [hit.to_dict() for hit in s.scan()]
+                    data = self.es_multi_match(keyword, fields, es_index)
                     # get the end time
                     et = time.time()
                     # get the execution time
