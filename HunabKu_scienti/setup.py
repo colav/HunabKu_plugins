@@ -83,7 +83,9 @@ def main():
             'flask>=1.1.2',
             'requests>=2.22.0',
             'hunabku',
-            'pymongo'
+            'pymongo',
+            'elasticsearch>=7.0.0',
+            'elasticsearch-dsl>=7.0.0'  # there is not release for es 8 yet, but it works.
         ],
     )
 
