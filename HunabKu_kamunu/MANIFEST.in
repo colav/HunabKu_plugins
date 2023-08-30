@@ -1,0 +1,2 @@
+recursive-include hunabku_kamunu/ *.py
+recursive-include hunabku_kamunu/ *.*
