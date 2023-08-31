@@ -141,12 +141,13 @@ class Kamunu(HunabkuPluginBase):
                     response = input
 
             if not return_:
-                return self.app.response_class(
-                    response=self.json.dumps(
-                    {'message': "It is necessary to define the 'return' parameter"}),
+                data = {"message": "It is necessary to define the 'return' parameter"}
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
                     status=404,
                     mimetype='application/json'
-                    )
+                )
+                return response
 
             if response:
                 if return_.lower() == "ids_only" or return_.lower() == "only_ids" or return_.lower() == "ids":
