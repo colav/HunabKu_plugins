@@ -83,7 +83,7 @@ def main():
             'flask>=1.1.2',
             'requests>=2.22.0',
             'hunabku',
-            'kamnunu'
+            'kamunu'
         ],
     )
 
