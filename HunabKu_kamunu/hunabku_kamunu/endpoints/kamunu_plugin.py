@@ -31,20 +31,35 @@ class Kamunu(HunabkuPluginBase):
         self.not_inserted_collection = self.db[self.config.not_inserted_collection]
         self.apikey = self.config.apikey
 
-    @endpoint('/kamunu', methods=['GET'])
+    @endpoint('/organizations', methods=['GET'])
     def search_organizations(self):
         """
-        @api {get} /kamunu Organizations IDs finder
-        @apiName Kamunu plugin
-        @apiGroup Kamunu
+        @api {get} /organizations Organizations IDs finder
+        @apiName Organizations finder plugin
+        @apiGroup Oganizations
+        @apiDescription Allows to perform searches for information about organizations
 
         @apiParam {String} apikey  Credential for authentication
-        @apiParam {String} query Organization name or id
-        @apiParam {String="IDs_Only", "Dehydrated_document" ,"Full_document", "Custom"} return="Dehydrated_document" Option for search response
-        @apiParam {String} source Source of the organization (Optional)
-        @apiParam {String} key Custom key for return (Optional) ('_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records')
+        @apiParam {String} query Organization name or identifier
+        @apiParam {String="IDs_Only", "Dehydrated_document" ,"Full_document", "Custom"} return="Dehydrated_document" Options for search response
+        @apiParam {String="_id", "raw_name" ,"names", "ids", "categories", "location", "records"} key="location" Options for custom key
+        @apiParam {String} source Source of the organization name (Optional)
 
-        @apiSuccess kamunu_plugin Dehydrated document of the organization
+        @apiSuccess Document/Dict Dehydrated document of the organization
+
+        @apiError (Error 401) msg  The HTTP 401 Unauthorized invalid authentication apikey for the target resource.
+        @apiError (Error 400) msg  Bad request, if the query is not right.
+        @apiError (Error 404) msg  Not Found, there were no valid results for the organization.
+
+        @apiExample {curl} Example usage:
+            # Get dehydrated document of the organization.
+            curl -i http://apis.colav.co/organizations?apikey=colavudea&query=Universidad%20de%20antioquia&return=Dehydrated_document
+
+            # Get only organization identifiers.
+            curl -i http://apis.colav.co/organizations?apikey=colavudea&query=Universidad%20de%20antioquia&return=IDs_Only
+
+            # Get a specific key of the document. ('_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records')
+            curl -i http://apis.colav.co/organizations?apikey=colavudea&query=Universidad%20de%20antioquia&return=custom&key=location
 
         """
 
@@ -120,12 +135,18 @@ class Kamunu(HunabkuPluginBase):
                 response = bd_search('_id', insert['_id'])
             else:
                 if input is None:
-                    # return "Organizations not in the database"
                     insert = extract_data.id_as_input(query, "single_search")
                     response = bd_search('_id', insert['_id'])
                 else:
-                    # Revisar
                     response = input
+
+            if not return_:
+                return self.app.response_class(
+                    response=self.json.dumps(
+                    {'message': "It is necessary to define the 'return' parameter"}),
+                    status=404,
+                    mimetype='application/json'
+                    )
 
             if response:
                 if return_.lower() == "ids_only" or return_.lower() == "only_ids" or return_.lower() == "ids":
@@ -154,12 +175,14 @@ class Kamunu(HunabkuPluginBase):
 
                 elif return_.lower() == "custom":
                     # Custom key
+                    if not key:
+                        key = 'location'
                     key = key.lower()
                     if key not in ['_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records']:
                         return self.app.response_class(
                             response=self.json.dumps(
                                 {'message': 'Invalid key'}),
-                            status=404,
+                            status=400,
                             mimetype='application/json'
                         )
                     else:
@@ -172,7 +195,7 @@ class Kamunu(HunabkuPluginBase):
             else:
                 return self.app.response_class(
                     response=self.json.dumps(
-                        {'message': f'There were no valid results for the organization: "{query}"'}),
+                        {'message': f'Not Found: There were no valid results for the organization: "{query}"'}),
                     status=404,
                     mimetype='application/json'
                 )
