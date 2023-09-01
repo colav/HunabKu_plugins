@@ -53,13 +53,13 @@ class Kamunu(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # Get dehydrated document of the organization.
-            curl -i http://apis.colav.co/organizations?apikey=colavudea&query=Universidad%20de%20antioquia&return=Dehydrated_document
+            curl -i http://apis.colav.co/organizations?apikey=XXXX&query=Universidad%20de%20antioquia&return=Dehydrated_document
 
             # Get only organization identifiers.
-            curl -i http://apis.colav.co/organizations?apikey=colavudea&query=Universidad%20de%20antioquia&return=IDs_Only
+            curl -i http://apis.colav.co/organizations?apikey=XXXX&query=Universidad%20de%20antioquia&return=IDs_Only
 
             # Get a specific key of the document. ('_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records')
-            curl -i http://apis.colav.co/organizations?apikey=colavudea&query=Universidad%20de%20antioquia&return=custom&key=location
+            curl -i http://apis.colav.co/organizations?apikey=XXXX&query=Universidad%20de%20antioquia&return=custom&key=location
 
         """
 
@@ -144,7 +144,7 @@ class Kamunu(HunabkuPluginBase):
                 data = {"message": "It is necessary to define the 'return' parameter"}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
-                    status=404,
+                    status=400,
                     mimetype='application/json'
                 )
                 return response
@@ -193,6 +193,15 @@ class Kamunu(HunabkuPluginBase):
                             status=200,
                             mimetype='application/json'
                         )
+                else:
+                    data = {"message": "Invalid value for 'return' parameter"}
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=400,
+                        mimetype='application/json'
+                    )
+                    return response
+
             else:
                 return self.app.response_class(
                     response=self.json.dumps(
