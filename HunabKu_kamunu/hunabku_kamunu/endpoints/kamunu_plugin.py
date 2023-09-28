@@ -138,7 +138,6 @@ class Kamunu(HunabkuPluginBase):
                 kamunu_query = query
                 insert = kamunu_main.single_organization(
                     kamunu_query, "single_search", country)
-                print(f'EL INSERT ES {insert}')
                 if insert:
                     response = bd_search('_id', insert['_id'])
                 else:
