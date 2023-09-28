@@ -1,5 +1,5 @@
 from hunabku.HunabkuBase import HunabkuPluginBase, endpoint
-from kamunu import kamunu_main, extract_data
+from kamunu import kamunu_main, id_input
 from hunabku.Config import Config, Param
 from pymongo import MongoClient
 from flask import request
@@ -41,6 +41,8 @@ class Kamunu(HunabkuPluginBase):
 
         @apiParam {String} apikey  Credential for authentication
         @apiParam {String} query Organization name or identifier
+        @apiParam {String} country Country of the organization (Optional)
+
         @apiParam {String="IDs_Only", "Dehydrated_document" ,"Full_document", "Custom"} return="Dehydrated_document" Options for search response
         @apiParam {String="_id", "raw_name" ,"names", "ids", "categories", "location", "records"} key="location" Options for custom key
         @apiParam {String} source Source of the organization name (Optional)
@@ -70,6 +72,7 @@ class Kamunu(HunabkuPluginBase):
         source = request.args.get('source')
         return_ = request.args.get('return')
         key = request.args.get('key')
+        country = request.args.get('country')
 
         def bd_search(key: str, query: str):
             """"
@@ -83,11 +86,11 @@ class Kamunu(HunabkuPluginBase):
                 The record found.
             """
 
+            results = None
             # Search for the organization in the collection
             results = self.records_collection.find_one({key: query})
 
-            if results is not None:
-                return results
+            return results
 
         def detect_input_type(query):
             """
@@ -115,33 +118,48 @@ class Kamunu(HunabkuPluginBase):
             elif re.match(ror_id_pattern, query) and len(query) == 9 and query.startswith('0') and query[-1].isdigit():
                 return bd_search('ids.ror', "https://ror.org/" + query)
             else:
-                return 'text'
+                return 'string'
 
         query = request.args.get('query')
         if query:
             input = detect_input_type(query)
 
-            if input == 'text' and source:
+            if country:
+                country = country.lower().title()
+
+            if input == 'string' and source:
                 kamunu_query = query
                 kamunu_source = source
                 insert = kamunu_main.single_organization(
-                    kamunu_query, kamunu_source)
+                    kamunu_query, kamunu_source, country)
                 response = bd_search('_id', insert['_id'])
 
-            elif input == 'text':
+            elif input == 'string':
                 kamunu_query = query
                 insert = kamunu_main.single_organization(
-                    kamunu_query, "single_search")
-                response = bd_search('_id', insert['_id'])
+                    kamunu_query, "single_search", country)
+                print(f'EL INSERT ES {insert}')
+                if insert:
+                    response = bd_search('_id', insert['_id'])
+                else:
+                    response = None
+
             else:
                 if input is None:
-                    insert = extract_data.id_as_input(query, "single_search")
+                    if source:
+                        kamunu_source = source
+                    else:
+                        kamunu_source = "single_search"
+
+                    insert = id_input.id_as_input(
+                        query, kamunu_source, country)
                     response = bd_search('_id', insert['_id'])
                 else:
                     response = input
 
             if not return_:
-                data = {"message": "It is necessary to define the 'return' parameter"}
+                data = {
+                    "message": "It is necessary to define the 'return' parameter"}
                 response = self.app.response_class(
                     response=self.json.dumps(data),
                     status=400,
@@ -203,9 +221,15 @@ class Kamunu(HunabkuPluginBase):
                     return response
 
             else:
+                if country:
+                    message = {
+                        'message': f'Not Found: There were no valid results for the organization: {query} - {country}'}
+                else:
+                    message = {
+                        'message': f'Not Found: There were no valid results for the organization: {query}'}
+
                 return self.app.response_class(
-                    response=self.json.dumps(
-                        {'message': f'Not Found: There were no valid results for the organization: "{query}"'}),
+                    response=self.json.dumps(message),
                     status=404,
                     mimetype='application/json'
                 )
