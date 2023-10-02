@@ -44,7 +44,7 @@ class Kamunu(HunabkuPluginBase):
         @apiParam {String} country Country of the organization (Optional)
 
         @apiParam {String="IDs_Only", "Dehydrated_document" ,"Full_document", "Custom"} return="Dehydrated_document" Options for search response
-        @apiParam {String="_id", "raw_name" ,"names", "ids", "categories", "location", "records"} key="location" Options for custom key
+        @apiParam {String="_id", "raw_name" ,"names", "ids", "categories", "location", "records", "records.wikidata", "records.ror"} key="location" Options for custom key
         @apiParam {String} source Source of the organization name (Optional)
 
         @apiSuccess Document/Dict Dehydrated document of the organization
@@ -60,9 +60,11 @@ class Kamunu(HunabkuPluginBase):
             # Get only organization identifiers.
             curl -i http://apis.colav.co/organizations?apikey=XXXX&query=Universidad%20de%20antioquia&return=IDs_Only
 
-            # Get a specific key of the document. ('_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records')
+            # Get a specific key of the document. ('_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records', 'records.wikidata', 'records.ror')
             curl -i http://apis.colav.co/organizations?apikey=XXXX&query=Universidad%20de%20antioquia&return=custom&key=location
 
+            # Get data from wikidata and ror by entering the name of the organization or the identifier. ('records', 'records.wikidata', 'records.ror')
+            curl -i http://apis.colav.co/organizations?apikey=XXXX&query=Q1258413&return=custom&key=records
         """
 
         if not self.valid_apikey():
@@ -196,13 +198,31 @@ class Kamunu(HunabkuPluginBase):
                     if not key:
                         key = 'location'
                     key = key.lower()
-                    if key not in ['_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records']:
+                    if key not in ['_id', 'raw_name', 'names', 'ids', 'categories', 'location', 'records', 'records.wikidata', 'records.ror']:
                         return self.app.response_class(
                             response=self.json.dumps(
                                 {'message': 'Invalid key'}),
                             status=400,
                             mimetype='application/json'
                         )
+
+                    elif key == 'records.wikidata' or key == 'records.ror':
+                        child = key.split('.')[1]
+                        if child in response['records']:
+                            return self.app.response_class(
+                                response=self.json.dumps(
+                                    response['records'][child], default=str),
+                                status=200,
+                                mimetype='application/json'
+                            )
+                        else:
+                            return self.app.response_class(
+                                response=self.json.dumps(
+                                    {'message': f'Not {child} data found in the record.'}),
+                                status=400,
+                                mimetype='application/json'
+                            )
+
                     else:
                         return self.app.response_class(
                             response=self.json.dumps(
