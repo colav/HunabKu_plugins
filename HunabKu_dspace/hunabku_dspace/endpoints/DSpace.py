@@ -88,9 +88,9 @@ class DSpace(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the products for the institution
-            curl -i http://apis.colav.co/dspace/product?apikey=XXXX&institution=udea
+            curl -i https://apis.colav.co/dspace/product?apikey=XXXX&institution=udea
             # An specific product
-            curl -i http://apis.colav.co/dspace/product?apikey=XXXX&institution=udea&id=oai:bibliotecadigital.udea.edu.co:10495/1489
+            curl -i https://apis.colav.co/dspace/product?apikey=XXXX&institution=udea&id=oai:bibliotecadigital.udea.edu.co:10495/1489
         """
 
         if self.valid_apikey():
@@ -165,8 +165,8 @@ class DSpace(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # resume of dspace database
-            curl -i http://apis.colav.co/dspace/info?apikey=XXXX&get=resume
-            curl -i http://apis.colav.co/dspace/info?apikey=XXXX&get=ids&institution=udea
+            curl -i https://apis.colav.co/dspace/info?apikey=XXXX&get=resume
+            curl -i https://apis.colav.co/dspace/info?apikey=XXXX&get=ids&institution=udea
         """
         if self.valid_apikey():
             option = self.request.args.get('get')
