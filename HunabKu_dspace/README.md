@@ -9,12 +9,12 @@ You can download information of DSpace from multiples institutions such as udea,
 # Installation
 
 ## Dependencies
-Not required
+You need the database of dspace, you can download it using [Oxomoc](https://github.com/colav/oxomoc)
+It requires MongoDB.
+by default it uses the database `oxomoc` and the collections `dspace_{instution}_records`
 
 ## Package
-Write here how to install this plugin
-usauly is 
-
+You can install this package using pip
 `pip install hunabku_dspace`
 
 
