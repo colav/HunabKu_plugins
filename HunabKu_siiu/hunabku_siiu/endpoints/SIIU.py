@@ -31,6 +31,10 @@ class SIIU(HunabkuPluginBase):
             self.es = Elasticsearch(self.config.es_uri, basic_auth=auth)
 
     def check_index(self):
+        """
+        Check if the index exists in Elastic Search
+        returns error 500 if the index does not exists.
+        """
         if not self.es.indices.exists(index=self.config.es_project_index):
             response = self.app.response_class(
                 response=self.json.dumps(
@@ -68,17 +72,17 @@ class SIIU(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the products for the user
-            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&search=keyword
+            curl -i https://apis.colav.co/siiu/project?apikey=XXXX&search=keyword
             # An specific product
-            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&CODIGO=2013-86
+            curl -i https://apis.colav.co/siiu/project?apikey=XXXX&CODIGO=2013-86
             # An projects given a group id
-            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&group_code=COL0008423
+            curl -i https://apis.colav.co/siiu/project?apikey=XXXX&group_code=COL0008423
             # An projects given a group name
-            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&group_name="psicologia cognitiva"
+            curl -i https://apis.colav.co/siiu/project?apikey=XXXX&group_name="psicologia cognitiva"
             # An projects given a participant name
-            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&participant_name="Diego Alejandro Restrepo Quintero"
+            curl -i https://apis.colav.co/siiu/project?apikey=XXXX&participant_name="Diego Alejandro Restrepo Quintero"
             # An projects given a participant id
-            curl -i http://apis.colav.co/siiu/project?apikey=XXXX&participant_id="xxxx"
+            curl -i https://apis.colav.co/siiu/project?apikey=XXXX&participant_id="xxxx"
 
         """
         if self.valid_apikey():
@@ -252,7 +256,7 @@ class SIIU(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the products for the user
-            curl -i http://apis.colav.co/siiu/info?apikey=XXXX
+            curl -i https://apis.colav.co/siiu/info?apikey=XXXX
         """
         data = list(self.dbclient[self.config.mdb_name]
                     ["project"].find({}, {'_id': 0, 'CODIGO': 1}))
