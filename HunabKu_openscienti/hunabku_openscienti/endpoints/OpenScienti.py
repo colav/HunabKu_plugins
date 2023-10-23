@@ -33,7 +33,7 @@ class OpenScienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the info for the user
-            curl -i http://apis.colav.co/openscienti/cvlac?COD_RH=0000000020
+            curl -i https://apis.colav.co/openscienti/cvlac?COD_RH=0000000020
         """
         try:
             cod_rh = self.request.args.get('COD_RH')
@@ -98,7 +98,7 @@ class OpenScienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # resume of open scienti data
-            curl -i http://apis.colav.co/scienti/info
+            curl -i https://apis.colav.co/scienti/info
         """
         try:
             data = {}
