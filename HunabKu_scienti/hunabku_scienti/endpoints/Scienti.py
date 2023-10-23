@@ -137,15 +137,15 @@ class Scienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the products for the user
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000639
+            curl -i https://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000639
             # An specific product
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000639&COD_PRODUCTO=24
+            curl -i https://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000639&COD_PRODUCTO=24
             # An specific product category
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=ART-ART_A1
+            curl -i https://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=ART-ART_A1
             # Text search for a keyword using elastic search
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
+            curl -i https://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
             # return products for the given group id
-            curl -i http://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
+            curl -i https://apis.colav.co/scienti/product?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
 
 
         """
@@ -305,15 +305,15 @@ class Scienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the networks for the user
-            curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000172057
+            curl -i https://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000172057
             # An specific network
-            curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000172057&COD_RED=1
+            curl -i https://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000172057&COD_RED=1
             # An specific network category
-            curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=RC-RC_A
+            curl -i https://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=RC-RC_A
             # Text search for a keyword using elastic search
-            curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&search="educación"
+            curl -i https://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&search="educación"
             # return networks for the given group id
-            curl -i http://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0053803
+            curl -i https://apis.colav.co/scienti/network?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0053803
 
         """
 
@@ -471,15 +471,15 @@ class Scienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the projects for the user
-            curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000930
+            curl -i https://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000930
             # An specific project
-            curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000930&COD_PROYECTO=1
+            curl -i https://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000930&COD_PROYECTO=1
             # An specific project category
-            curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=PID-00
+            curl -i https://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=PID-00
             # Text search for a keyword using elastic search
-            curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
+            curl -i https://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
             # return projects for the given group id
-            curl -i http://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
+            curl -i https://apis.colav.co/scienti/project?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
 
         """
 
@@ -622,15 +622,15 @@ class Scienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the events for the user
-            curl -i http://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000016
+            curl -i https://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000016
             # An specific event
-            curl -i http://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000016&COD_EVENTO=2
+            curl -i https://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000000016&COD_EVENTO=2
             # An specific event category
-            curl -i http://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=EC-EC_B
+            curl -i https://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=EC-EC_B
             # Text search for a keyword using elastic search
-            curl -i http://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
+            curl -i https://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&search="machine learning"
             # return event for the given group id
-            curl -i http://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
+            curl -i https://apis.colav.co/scienti/event?apikey=XXXX&model_year=2022&institution=udea&group_id=COL0008423
 
         """
         if self.valid_apikey():
@@ -773,13 +773,13 @@ class Scienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # all the patents for the user
-            curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000204234
+            curl -i https://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000204234
             # An specific patent
-            curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000204234&COD_PATENTE=2
+            curl -i https://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000204234&COD_PATENTE=2
             # An specific patent category
-            curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=PIV-00
+            curl -i https://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&SGL_CATEGORIA=PIV-00
             # Text search for a keyword using elastic search
-            curl -i http://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&search="process"
+            curl -i https://apis.colav.co/scienti/patent?apikey=XXXX&model_year=2022&institution=udea&search="process"
         """
         if self.valid_apikey():
             cod_rh = self.request.args.get('COD_RH')
@@ -899,8 +899,8 @@ class Scienti(HunabkuPluginBase):
 
         @apiExample {curl} Example usage:
             # resume of scienti data bases and model_years
-            curl -i http://apis.colav.co/scienti/info?apikey=XXXX&get=resume
-            curl -i http://apis.colav.co/scienti/info?apikey=XXXX&get=ids&institution=udea&model_year=2022
+            curl -i https://apis.colav.co/scienti/info?apikey=XXXX&get=resume
+            curl -i https://apis.colav.co/scienti/info?apikey=XXXX&get=ids&institution=udea&model_year=2022
         """
         if self.valid_apikey():
             option = self.request.args.get('get')
