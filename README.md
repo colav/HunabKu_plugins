@@ -1,5 +1,7 @@
 [![Python package](https://github.com/colav/HunabKu_plugins/actions/workflows/python-package.yml/badge.svg?branch=main)](https://github.com/colav/HunabKu_plugins/actions/workflows/python-package.yml)
 
+<center><img src="https://raw.githubusercontent.com/colav/colav.github.io/master/img/Logo.png"/></center>
+
 # HunabKu_plugins
 Mono Repo for HunabKu Plugins 
 
