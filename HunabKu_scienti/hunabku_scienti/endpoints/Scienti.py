@@ -879,7 +879,6 @@ class Scienti(HunabkuPluginBase):
         else:
             return self.apikey_error()
 
-
     @endpoint('/scienti/author', methods=['GET'])
     def scienti_author(self):
         """
