@@ -793,7 +793,7 @@ class Scienti(HunabkuPluginBase):
             if response is not None:
                 return response
             response = self.check_parameters(
-                ['apikey', 'COD_RH', 'COD_PROYECTO', 'COD_PATENTE', 'model_year', 'institution', 'search'], self.request.args.keys())
+                ['apikey', 'COD_RH', 'COD_PATENTE', 'model_year', 'institution', 'search'], self.request.args.keys())
             if response is not None:
                 return response
 
@@ -852,6 +852,81 @@ class Scienti(HunabkuPluginBase):
                     elapsed_time = et - st
                     print(f'Search for "{keyword}" Execution time:',
                           elapsed_time, 'seconds')
+                    response = self.app.response_class(
+                        response=self.json.dumps(data),
+                        status=200,
+                        mimetype='application/json'
+                    )
+                    return response
+                data = {
+                    "error": "Bad Request", "message": "invalid parameters, please select the right combination of parameters"}
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=400,
+                    mimetype='application/json'
+                )
+                return response
+
+            except Exception as e:
+                data = {"error": "Bad Request", "message": str(
+                    sys.exc_info()), "exception": str(e)}
+                response = self.app.response_class(
+                    response=self.json.dumps(data),
+                    status=400,
+                    mimetype='application/json'
+                )
+                return response
+        else:
+            return self.apikey_error()
+
+
+    @endpoint('/scienti/author', methods=['GET'])
+    def scienti_author(self):
+        """
+        @api {get} /scienti/author Scienti author endpoint
+        @apiName author
+        @apiGroup Scienti
+        @apiDescription Allows to perform queries for authors.
+
+        @apiParam {String} apikey  Credential for authentication
+        @apiParam {String} COD_RH  User primary key
+        @apiParam {String} model_year  year of the scienti model, example: 2023
+        @apiParam {String} institution institution initials. supported example: udea, uec, unaula, univalle
+
+        @apiSuccess {Object}  Resgisters from MongoDB in Json format.
+
+        @apiError (Error 401) msg  The HTTP 401 Unauthorized invalid authentication apikey for the target resource.
+        @apiError (Error 400) msg  Bad request, if the query is not right.
+
+        @apiExample {curl} Example usage:
+            # all the author for the user
+            curl -i https://apis.colav.co/scienti/author?apikey=XXXX&model_year=2022&institution=udea&COD_RH=0000204234
+        """
+        if self.valid_apikey():
+            cod_rh = self.request.args.get('COD_RH')
+            model_year = self.request.args.get('model_year')
+            institution = self.request.args.get('institution')
+
+            response = self.check_required_parameters(self.request.args)
+            if response is not None:
+                return response
+            response = self.check_parameters(
+                ['apikey', 'COD_RH', 'model_year', 'institution'], self.request.args.keys())
+            if response is not None:
+                return response
+
+            db_name = f'scienti_{institution}_{model_year}'
+
+            response = self.check_db(db_name)
+            if response is not None:
+                return response
+
+            try:
+                db = self.dbclient[db_name]
+                data = []
+                if cod_rh:
+                    data = list(db["author"].find(
+                        {'COD_RH': cod_rh}, {"_id": 0}))
                     response = self.app.response_class(
                         response=self.json.dumps(data),
                         status=200,
