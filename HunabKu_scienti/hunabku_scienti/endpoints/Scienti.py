@@ -1024,6 +1024,9 @@ class Scienti(HunabkuPluginBase):
                     for col in self.dbclient[db].list_collection_names():
                         if "_checkpoint" not in col:
                             ids = []
+                            if col == "author":
+                                ids = list(self.dbclient[db][col].find(
+                                    {}, {'COD_RH': 1, '_id': 0}))
                             if col == "product":
                                 ids = list(self.dbclient[db][col].find(
                                     {}, {'COD_RH': 1, 'COD_PRODUCTO': 1, '_id': 0}))
