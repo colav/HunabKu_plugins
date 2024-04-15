@@ -19,7 +19,30 @@ for that install MongoDB https://www.mongodb.com/docs/manual/administration/inst
 
 `pip install hunabku_scienti`
 
+## Elastic Search
+Install Kerana
+`pip install kerana`
 
+```
+kerana --es_index scienti_udea_2022_product --mdb_name scienti_udea_2022 --mdb_col product --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_udea_2022_project --mdb_name scienti_udea_2022 --mdb_col project --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_udea_2022_patent  --mdb_name scienti_udea_2022 --mdb_col patent  --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_udea_2022_network --mdb_name scienti_udea_2022 --mdb_col network --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_udea_2022_event   --mdb_name scienti_udea_2022 --mdb_col event   --bulk_size 100 --es_pass xxx
+
+kerana --es_index scienti_uec_2022_product --mdb_name scienti_uec_2022 --mdb_col product --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_uec_2022_project --mdb_name scienti_uec_2022 --mdb_col project --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_uec_2022_patent  --mdb_name scienti_uec_2022 --mdb_col patent  --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_uec_2022_network --mdb_name scienti_uec_2022 --mdb_col network --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_uec_2022_event   --mdb_name scienti_uec_2022 --mdb_col event   --bulk_size 100 --es_pass xxx
+
+kerana --es_index scienti_ual_2023_product --mdb_name scienti_ual_2023 --mdb_col product --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_ual_2023_project --mdb_name scienti_ual_2023 --mdb_col project --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_ual_2023_patent  --mdb_name scienti_ual_2023 --mdb_col patent  --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_ual_2023_network --mdb_name scienti_ual_2023 --mdb_col network --bulk_size 100 --es_pass xxx
+kerana --es_index scienti_ual_2023_event   --mdb_name scienti_ual_2023 --mdb_col event   --bulk_size 100 --es_pass xxx
+
+```
 # Usage
 **TODO!**
 config section in the config file with the parameters here
