@@ -118,7 +118,11 @@ class International(HunabkuPluginBase):
 
     def raw_payload_csv_response(self, data, filename):
         if data:
-            keys = data[0].keys()
+            keys = []
+            for record in data:
+                for key in record.keys():
+                    if key not in keys:
+                        keys.append(key)
 
             response = Response(content_type='text/csv')
             response.headers.set('Content-Disposition',
